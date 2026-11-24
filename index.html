@@ -3,1080 +3,2378 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台灣長期果樹產區變遷分析（2008–2025）｜v2.0 深度探索儀表板</title>
+  <title>台灣果品農情長期時空觀測平台 (1997–2025)｜Taiwan Fruit Agro-Geography Atlas v3.0.0</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
   <script src="data/dashboard_data.js"></script>
   <script src="data/taiwan_topo.js"></script>
   <style>
     :root {
-      --bg: #f6f8fb;
-      --card: #ffffff;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #0f766e;
-      --primary-light: #ccfbf1;
-      --gain: #dc2626;
-      --loss: #2563eb;
-      --accent: #d97706;
+      --bg: #f3f5f8;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #d8e0e8;
+      --border-strong: #b8c4d0;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent: #0f4c81;
+      --accent-soft: #e0ecf7;
+      --pos: #b2182b;
+      --pos-bg: #fdeeee;
+      --neg: #2166ac;
+      --neg-bg: #ebf3fb;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Noto Sans TC", "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", Roboto, sans-serif;
+      font-family: var(--sans);
       background: var(--bg);
       color: var(--text);
-      line-height: 1.5;
+      font-size: 13.5px;
+      line-height: 1.45;
+      font-variant-numeric: tabular-nums;
     }
-    header {
-      background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%);
-      color: #fff;
-      padding: 24px 32px;
-      border-bottom: 4px solid #14b8a6;
-    }
-    header h1 {
-      margin: 0 0 6px 0;
-      font-size: 1.65rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-    header p {
-      margin: 0;
-      color: #cbd5e1;
-      font-size: 0.95rem;
-    }
-    .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .badge {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      color: #e2e8f0;
-    }
-    .badge-ver {
-      background: rgba(20,184,166,0.28);
-      border-color: #2dd4bf;
-      color: #f0fdfa;
-      font-weight: 600;
-    }
-    main {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-    }
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
-      gap: 14px;
-    }
-    .kpi-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 15px 17px;
-      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
-    }
-    .kpi-label { font-size: 0.81rem; color: var(--muted); margin-bottom: 4px; }
-    .kpi-value { font-size: 1.35rem; font-weight: 700; color: var(--text); }
-    .kpi-sub { font-size: 0.79rem; color: var(--muted); margin-top: 4px; }
-    .kpi-gain { color: var(--gain); }
-    .kpi-loss { color: var(--loss); }
-
-    .section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 22px;
-      box-shadow: 0 1px 4px rgba(15,23,42,0.04);
-    }
-    .section-header {
+    /* Top Observatory Header */
+    .topbar {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 12px 20px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #1e293b;
     }
-    .section-title {
-      margin: 0;
-      font-size: 1.15rem;
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .brand-title {
+      font-size: 1.08rem;
       font-weight: 700;
+      letter-spacing: 0.2px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .step-tag {
-      background: var(--primary-light);
-      color: var(--primary);
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 6px;
+    .ver-pill {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #93c5fd;
+      padding: 1px 7px;
+      border-radius: 4px;
       font-weight: 600;
     }
-    .controls {
+    .brand-sub {
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 7px 14px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .nav-tab:hover { background: #334155; color: #fff; }
+    .nav-tab.active {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: #f8fafc;
+    }
+
+    /* Sticky Global Control Ribbon */
+    .control-ribbon {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 20px;
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
       align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
-    select, input, button {
-      font-family: inherit;
-      font-size: 0.85rem;
-      padding: 6px 10px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
+    .ctrl-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .ctrl-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    select, input[type="text"], button.btn {
+      font-family: var(--sans);
+      font-size: 0.81rem;
+      padding: 4px 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
       background: #fff;
       color: var(--text);
+      font-variant-numeric: tabular-nums;
     }
-    button.tab-btn {
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    button.btn {
       cursor: pointer;
-      transition: all 0.15s;
+      font-weight: 500;
+      transition: all 0.12s;
     }
-    button.tab-btn:hover {
-      border-color: var(--primary);
-    }
-    button.tab-btn.active {
-      background: var(--primary);
+    button.btn:hover { background: var(--surface-alt); border-color: var(--accent); }
+    button.btn.active {
+      background: var(--accent);
       color: #fff;
-      border-color: var(--primary);
+      border-color: var(--accent);
     }
-    .family-tabs {
+    button.btn-export {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+      font-weight: 600;
+    }
+    button.btn-export:hover { background: #1e293b; }
+    .seg-group {
+      display: inline-flex;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .seg-btn {
+      border: none;
+      background: #fff;
+      color: var(--text-secondary);
+      padding: 4px 9px;
+      font-size: 0.79rem;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      font-family: var(--sans);
+    }
+    .seg-btn:last-child { border-right: none; }
+    .seg-btn.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .divider-v {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 2px;
+    }
+
+    /* Main Workbench Container */
+    .workbench {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 14px 18px 28px;
+    }
+    .tab-pane { display: none; flex-direction: column; gap: 14px; }
+    .tab-pane.active { display: flex; }
+
+    /* Panel & Grid Primitives */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+    .panel-head {
       display: flex;
       flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
       gap: 8px;
-      margin-bottom: 16px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #edf1f5;
     }
-    .family-tab {
+    .panel-title {
+      margin: 0;
       font-size: 0.92rem;
-      font-weight: 600;
-      padding: 8px 15px;
-      border-radius: 9px;
-      cursor: pointer;
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      color: #334155;
-      transition: all 0.15s;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .family-tab.active {
-      background: #0f766e;
-      color: #fff;
-      border-color: #0f766e;
-      box-shadow: 0 2px 6px rgba(15,118,110,0.22);
+    .code-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--text-secondary);
     }
 
-    .grid-2 {
+    /* Stat Readout Strip */
+    .stat-strip {
       display: grid;
-      grid-template-columns: 1.12fr 1fr;
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 8px;
     }
-    .grid-map {
-      display: grid;
-      grid-template-columns: 1fr 1.12fr;
-      gap: 18px;
+    .stat-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 9px 11px;
     }
-    @media (max-width: 980px) {
-      .grid-2, .grid-map { grid-template-columns: 1fr; }
+    .stat-lbl {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
     }
-    .chart-box { width: 100%; height: 410px; }
-    .map-box { width: 100%; height: 540px; }
-    .sub-chart-box { width: 100%; height: 255px; }
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-meta {
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .val-pos { color: var(--pos); }
+    .val-neg { color: var(--neg); }
 
-    .table-wrap {
-      max-height: 460px;
+    /* Multi-column Workbench Grids */
+    .grid-crop-main {
+      display: grid;
+      grid-template-columns: 1.02fr 1.25fr;
+      gap: 14px;
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .grid-region-top {
+      display: grid;
+      grid-template-columns: 0.92fr 1.28fr;
+      gap: 14px;
+    }
+    @media (max-width: 1080px) {
+      .grid-crop-main, .grid-2col, .grid-region-top { grid-template-columns: 1fr; }
+    }
+
+    .chart-h340 { width: 100%; height: 340px; }
+    .chart-h380 { width: 100%; height: 380px; }
+    .chart-h480 { width: 100%; height: 480px; }
+    .chart-h220 { width: 100%; height: 220px; }
+
+    /* Scientific Data Tables */
+    .table-scroll {
+      max-height: 390px;
       overflow-y: auto;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 4px;
     }
-    .table-wrap-sm {
-      max-height: 240px;
-      overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 12px;
-    }
-    table {
+    table.sci-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
     }
-    th {
+    table.sci-table th {
       position: sticky;
       top: 0;
       background: #f1f5f9;
-      text-align: left;
-      padding: 9px 10px;
+      color: #334155;
       font-weight: 600;
-      border-bottom: 1px solid var(--border);
-      z-index: 1;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border-strong);
+      text-align: left;
+      white-space: nowrap;
+      z-index: 2;
     }
-    td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: top;
+    table.sci-table th.num, table.sci-table td.num {
+      text-align: right;
+      font-family: var(--mono);
     }
-    tr.clickable { cursor: pointer; transition: background 0.12s; }
-    tr.clickable:hover { background: #f8fafc; }
-    tr.clickable.selected { background: #ecfdf5; }
-    .pill {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 5px;
-      font-size: 0.76rem;
-      margin: 1px 2px 1px 0;
-      font-weight: 500;
+    table.sci-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #eef2f6;
+      vertical-align: middle;
     }
-    .pill-loss { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .pill-gain { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-    .pill-neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    table.sci-table tr.row-link { cursor: pointer; }
+    table.sci-table tr.row-link:hover { background: #f1f6fb; }
+    table.sci-table tr.row-link.selected { background: var(--accent-soft); }
 
-    .town-summary-bar {
-      background: #f8fafc;
+    .delta-chip {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin: 1px 2px 1px 0;
+    }
+    .chip-pos { background: var(--pos-bg); color: var(--pos); border: 1px solid #f5c2c7; }
+    .chip-neg { background: var(--neg-bg); color: var(--neg); border: 1px solid #b6d4fe; }
+    .chip-neu { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    .compare-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .cmp-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid #b6d4fe;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.77rem;
+      font-weight: 600;
+    }
+    .cmp-pill span.rm { cursor: pointer; font-weight: 700; color: #475569; }
+    .cmp-pill span.rm:hover { color: var(--pos); }
+
+    .method-note {
+      background: var(--surface-alt);
+      border-left: 3px solid var(--accent);
+      padding: 8px 11px;
+      font-size: 0.79rem;
+      color: var(--text-secondary);
+      border-radius: 0 4px 4px 0;
+    }
+    .slider-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-alt);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 11px 14px;
-      margin-bottom: 12px;
-      font-size: 0.87rem;
-    }
-    .note-box {
-      background: #fffbeb;
-      border-left: 4px solid var(--accent);
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 0.84rem;
-      color: #78350f;
-      margin-top: 10px;
-    }
-    .info-box {
-      background: #f0fdfa;
-      border-left: 4px solid #0d9488;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 0.84rem;
-      color: #134e4a;
-      margin-top: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
     }
     footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.82rem;
-      padding: 12px 24px 32px;
-      max-width: 1280px;
+      max-width: 1560px;
       margin: 0 auto;
+      padding: 10px 18px 28px;
+      color: var(--text-muted);
+      font-size: 0.77rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>台灣長期果樹產區變遷分析（2008–2025）</h1>
-    <p>全台灣 368 鄉鎮 33 項果樹農情消長：柑橘細項拆解、文旦柚獨立追蹤、葡萄與芒果品種結構及 A→B 轉作熱點</p>
-    <div class="badge-row">
-      <span class="badge badge-ver" id="verBadge">v2.0</span>
-      <span class="badge">資料來源：農業部開放資料平臺 UnitId=038（33 項果樹代碼）</span>
-      <span class="badge">時間跨度：民國 97–114 年（2008–2025，共 18 年）</span>
-      <span class="badge">重點族群：柑橘 12 細項 ／ 文旦柚獨立 ／ 葡萄 5 項 ／ 芒果 2 項</span>
-      <span class="badge">銜接目標：Step 2 Land Cover 圖資套疊 ／ Step 3 鄉鎮農民訪談</span>
+  <!-- Top Observatory Bar -->
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="brand-title">
+        台灣果品農情長期時空觀測平台 (1997–2025)
+        <span class="ver-pill" id="verPill">v3.0.0</span>
+      </div>
+      <div class="brand-sub">Taiwan Township-Level Fruit Agro-Geography &amp; Long-Term Production Observatory · 29 Years (ROC 86–114) × 56 Official Fruit Codes × 368 Townships</div>
     </div>
+    <nav class="nav-tabs" id="mainNavTabs">
+      <button class="nav-tab active" data-tab="crop">1. Crop Explorer｜品項時空觀測</button>
+      <button class="nav-tab" data-tab="region">2. Region Explorer｜區域與鄉鎮結構</button>
+      <button class="nav-tab" data-tab="synthesis">3. Synthesis &amp; QC｜專題洞察・轉作選點・品管</button>
+    </nav>
   </header>
 
-  <main>
-    <!-- KPI 總覽 -->
-    <div class="kpi-grid" id="kpiGrid"></div>
+  <!-- Sticky Global Scientific Control Ribbon -->
+  <div class="control-ribbon">
+    <div class="ctrl-group">
+      <span class="ctrl-label">觀測變數</span>
+      <select id="metricSelect">
+        <option value="planted">種植面積 Planted Area (ha)</option>
+        <option value="harvested">收穫/結實面積 Harvested Area (ha)</option>
+        <option value="ratio">收穫率 Harvested / Planted (%)</option>
+        <option value="yield">單位面積產量 Unit Yield (kg/ha)</option>
+        <option value="prod">總收量 Production (t, 公噸)</option>
+      </select>
 
-    <!-- 模組 1：全台長期消長 -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title"><span class="step-tag">模組 1</span> 全台果樹長期消長總覽（2008–2025）</h2>
-        <div class="controls" id="catFilterBtns">
-          <button class="tab-btn active" data-cat="MAJOR">主力品項 (&ge;200ha)</button>
-          <button class="tab-btn" data-cat="ALL">全部品項 (33)</button>
-          <button class="tab-btn" data-cat="溫帶/需冷">溫帶/需冷</button>
-          <button class="tab-btn" data-cat="柑橘(甜橙/寬皮)">柑橘(甜橙/寬皮)</button>
-          <button class="tab-btn" data-cat="柑橘(酸柑/金柑)">柑橘(酸柑/金柑)</button>
-          <button class="tab-btn" data-cat="文旦柚">文旦柚(獨立)</button>
-          <button class="tab-btn" data-cat="其他柚類">其他柚類</button>
-          <button class="tab-btn" data-cat="葡萄類">葡萄類</button>
-          <button class="tab-btn" data-cat="芒果類">芒果類</button>
-          <button class="tab-btn" data-cat="耐熱/熱帶">其他耐熱/熱帶</button>
-        </div>
+      <div class="divider-v"></div>
+
+      <span class="ctrl-label">基準期 A</span>
+      <select id="yrA1"></select><span>–</span><select id="yrA2"></select>
+      <span class="ctrl-label" style="margin-left:4px;">目標期 B</span>
+      <select id="yrB1"></select><span>–</span><select id="yrB2"></select>
+
+      <div class="seg-group" id="windowPresets" title="快速切換科學比較基準期">
+        <button class="seg-btn active" data-a1="1997" data-a2="2006" data-b1="2016" data-b2="2025">年代際 10yr (97-06 vs 16-25)</button>
+        <button class="seg-btn" data-a1="2008" data-a2="2012" data-b1="2021" data-b2="2025">近期 18yr (08-12 vs 21-25)</button>
+        <button class="seg-btn" data-a1="1997" data-a2="2001" data-b1="2003" data-b2="2007">WTO 入世前後 (97-01 vs 03-07)</button>
       </div>
-      <div class="grid-2">
-        <div>
-          <div style="font-size:0.84rem;color:var(--muted);margin-bottom:6px;">歷年全台總種植面積（公頃）— 可點擊下方圖例開關單一作物</div>
-          <div id="chartMacroLines" class="chart-box"></div>
-        </div>
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:0.84rem;color:var(--muted);">近 5 年 (2021–2025) vs. 前 5 年 (2008–2012) 平均變化</span>
-            <select id="barMetricSelect">
-              <option value="ha">面積增減 (公頃)</option>
-              <option value="pct">變化率 (%)</option>
-            </select>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="ctrl-label">資料品管</span>
+      <div class="seg-group" id="qcModeBtns">
+        <button class="seg-btn active" data-qc="qc" title="啟用雙向多年生異常值插補與缺漏修復">QC-Cleaned</button>
+        <button class="seg-btn" data-qc="raw" title="檢視未修正之原始農情調查回傳數值">Raw Official</button>
+      </div>
+
+      <span class="ctrl-label" style="margin-left:4px;">色階</span>
+      <select id="paletteSelect" title="感知均勻與色盲友善科學色階">
+        <option value="std">Viridis + RdBu (標準科學色階)</option>
+        <option value="cb">YlGnBu + BrBG (色盲高對比色階)</option>
+      </select>
+
+      <button class="btn btn-export" id="btnExportCsv" title="匯出當前視角完整 29 年時間序列 CSV">⬇ Export CSV</button>
+    </div>
+  </div>
+
+  <main class="workbench">
+    <!-- =================================================================== -->
+    <!-- TAB 1: CROP EXPLORER (品項出發：57 項果品時空與統計檢定)             -->
+    <!-- =================================================================== -->
+    <section class="tab-pane active" id="pane-crop">
+      <!-- Statistical Summary Readout Strip -->
+      <div class="stat-strip" id="cropStatStrip"></div>
+
+      <div class="grid-crop-main">
+        <!-- Left Column: Multi-Crop Time Series + Centroid & Regional Stack -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                主選品項：
+                <select id="cropPrimarySelect" style="font-weight:700;min-width:210px;"></select>
+              </div>
+              <div class="ctrl-group">
+                <span class="ctrl-label">疊圖比較 (+最多5項)</span>
+                <select id="cropCompareAddSelect" style="max-width:165px;">
+                  <option value="">+ 加入對照品項...</option>
+                </select>
+                <div class="seg-group" id="tsNormBtns">
+                  <button class="seg-btn active" data-norm="abs">絕對值</button>
+                  <button class="seg-btn" data-norm="idx">Index (期A=100)</button>
+                  <button class="seg-btn" data-norm="z">Z-Score (σ)</button>
+                </div>
+              </div>
+            </div>
+            <div class="compare-tags" id="compareTagsBox"></div>
+            <div id="chartCropTS" class="chart-h340"></div>
+            <div id="cropQcNotice" class="method-note" style="margin-top:6px;display:none;"></div>
           </div>
-          <div id="chartMacroBar" class="chart-box"></div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title" id="centroidPanelTitle">面積加權空間質心軌跡 (°N 緯度) 與區域結構演變</h3>
+              <div class="seg-group" id="cropSubChartBtns">
+                <button class="seg-btn active" data-sub="centroid">緯度質心 (°N) + Sen's Slope</button>
+                <button class="seg-btn" data-sub="lon">經度質心 (°E)</button>
+                <button class="seg-btn" data-sub="region">北/中/南/東 區域堆疊</button>
+              </div>
+            </div>
+            <div id="chartCropSub" class="chart-h220"></div>
+          </div>
+        </div>
+
+        <!-- Right Column: 368-Township Choropleth Atlas + Township Ranking -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title" id="cropMapTitle">368 鄉鎮空間分佈圖</h3>
+              <div class="ctrl-group">
+                <select id="cropMapMode">
+                  <option value="diff">Δ 跨期變化量 (期B − 期A)</option>
+                  <option value="pct">% 跨期變化率 ((B−A)/A %)</option>
+                  <option value="b_mean">目標期 B 平均值</option>
+                  <option value="a_mean">基準期 A 平均值</option>
+                  <option value="year">單一年度快照 (1997–2025)</option>
+                </select>
+                <div class="seg-group" id="mapScaleBtns" title="數值色彩映射尺度">
+                  <button class="seg-btn active" data-scale="linear">Linear</button>
+                  <button class="seg-btn" data-scale="log">Log10</button>
+                  <button class="seg-btn" data-scale="p95">P95 截尾抗極端</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="slider-bar" id="yearSliderBar" style="display:none;">
+              <button class="btn" id="btnPlayYear">▶ Play</button>
+              <span class="ctrl-label">快照年份：</span>
+              <input type="range" id="mapYearSlider" min="1997" max="2025" value="2025" style="flex:1;" />
+              <span id="mapYearLabel" style="font-family:var(--mono);font-weight:700;min-width:95px;">2025 (民114)</span>
+            </div>
+
+            <div id="chartCropMap" class="chart-h380"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title">鄉鎮級分佈明細與跨期變化排序（點擊任一鄉鎮切換至 Tab 2 區域觀測）</h3>
+              <div class="ctrl-group">
+                <input type="text" id="cropTownFilter" placeholder="篩選縣市或鄉鎮..." style="width:140px;" />
+                <select id="cropTownSort">
+                  <option value="b_desc">依 期B 規模 (大→小)</option>
+                  <option value="a_desc">依 期A 規模 (大→小)</option>
+                  <option value="diff_desc">依 Δ 擴張量 (最多→最少)</option>
+                  <option value="diff_asc">依 Δ 縮減量 (最多→最少)</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-scroll" style="max-height:225px;">
+              <table class="sci-table">
+                <thead>
+                  <tr>
+                    <th>行政區 (區域)</th>
+                    <th class="num" id="thCropA">期A 均</th>
+                    <th class="num" id="thCropB">期B 均</th>
+                    <th class="num">Δ 變化</th>
+                    <th class="num">% 變化</th>
+                    <th class="num">全台佔比(B)</th>
+                  </tr>
+                </thead>
+                <tbody id="cropTownTbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 模組 2：四大重點族群深度拆解（柑橘、文旦柚、葡萄、芒果） -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title"><span class="step-tag">模組 2</span> 重點品項族群深度拆解（柑橘細項 ／ 文旦柚獨立 ／ 葡萄細項 ／ 芒果細項）</h2>
-        <div class="controls" id="familySubControls"></div>
-      </div>
-
-      <div class="family-tabs" id="familyTabs">
-        <button class="family-tab active" data-fam="citrus">柑橘類細項（不含文旦及柚類，12項）</button>
-        <button class="family-tab" data-fam="wendan">文旦柚獨立專區（607，附其他柚類對照）</button>
-        <button class="family-tab" data-fam="grape">葡萄類細項（鮮食 vs 釀酒，5項）</button>
-        <button class="family-tab" data-fam="mango">芒果類專區（改良種 vs 本地種，2項）</button>
-      </div>
-
-      <div class="grid-2">
-        <div>
-          <div id="familySummaryBar" class="town-summary-bar"></div>
-          <div id="chartFamilyMain" class="chart-box" style="height:365px;"></div>
-          <div id="familyNoteBox" class="info-box"></div>
+    <!-- =================================================================== -->
+    <!-- TAB 2: REGION EXPLORER (區域出發：全台 / 區域 / 縣市 / 368 鄉鎮)     -->
+    <!-- =================================================================== -->
+    <section class="tab-pane" id="pane-region">
+      <div class="panel" style="padding:10px 14px;">
+        <div class="ctrl-group" style="justify-content:space-between;">
+          <div class="ctrl-group">
+            <span class="ctrl-label">空間層級選取：</span>
+            <select id="regRegionSelect">
+              <option value="ALL">全台灣 National (368 鄉鎮)</option>
+              <option value="北部">北部區域</option>
+              <option value="中部">中部區域</option>
+              <option value="南部">南部區域</option>
+              <option value="東部">東部區域</option>
+              <option value="離島">離島區域</option>
+            </select>
+            <span>▸</span>
+            <select id="regCountySelect">
+              <option value="ALL">全部縣市 (All Counties)</option>
+            </select>
+            <span>▸</span>
+            <select id="regTownSelect">
+              <option value="ALL">全區彙整 (All Townships in Scope)</option>
+            </select>
+            <input type="text" id="regQuickSearch" placeholder="快速搜尋鄉鎮 (如 麻豆、古坑、和平、玉井)..." style="width:230px;" />
+          </div>
+          <div class="ctrl-group">
+            <label style="font-size:0.8rem;color:var(--text-secondary);display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="checkbox" id="chkIncludeBetel" />
+              納入「檳榔 (622)」計算區域總面積與佔比
+            </label>
+          </div>
         </div>
-        <div>
-          <div style="font-size:0.84rem;font-weight:600;color:#334155;margin-bottom:6px;" id="familyCropTableTitle">品項明細與空間質心位移</div>
-          <div class="table-wrap-sm">
-            <table>
-              <thead>
-                <tr>
-                  <th>品項 (代碼)</th>
-                  <th>前5年均</th>
-                  <th>近5年均</th>
-                  <th>增減 (變化率)</th>
-                  <th>質心北移</th>
-                </tr>
-              </thead>
-              <tbody id="familyCropTbody"></tbody>
-            </table>
+      </div>
+
+      <!-- Region Stat Strip -->
+      <div class="stat-strip" id="regionStatStrip"></div>
+
+      <div class="grid-region-top">
+        <!-- Left: Spatial Reference & Dominant Crop Atlas -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">台灣鄉鎮果品空間結構圖（點擊地圖直接切換目標鄉鎮）</h3>
+            <select id="regMapMode">
+              <option value="dom_b">期B 第一大主力果品 (Dominant Crop B)</option>
+              <option value="dom_a">期A 第一大主力果品 (Dominant Crop A)</option>
+              <option value="tot_b">期B 果品總規模 (Total Fruit Area/Prod)</option>
+              <option value="tot_diff">Δ 果品總規模增減 (期B − 期A)</option>
+            </select>
+          </div>
+          <div id="chartRegMap" class="chart-h480"></div>
+        </div>
+
+        <!-- Right: 29-Year Composition Evolution + Delta Shift Bar -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title" id="regTsTitle">果品組成時間序列 (1997–2025)</h3>
+              <div class="seg-group" id="regTsModeBtns">
+                <button class="seg-btn active" data-rmode="stack">前10大堆疊 (Stacked)</button>
+                <button class="seg-btn" data-rmode="pct">結構佔比 (100% Share)</button>
+                <button class="seg-btn" data-rmode="line">前10大折線 (Lines)</button>
+              </div>
+            </div>
+            <div id="chartRegTS" class="chart-h340"></div>
           </div>
 
-          <div style="font-size:0.84rem;font-weight:600;color:#334155;margin-bottom:6px;" id="familyTownTableTitle">核心產區鄉鎮消長排行（點擊可連動下方模組 4 查看該鄉鎮全部果樹）</div>
-          <div class="table-wrap-sm" style="max-height:225px;margin-bottom:0;">
-            <table>
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title" id="regTableTitle">區域內全果品消長明細表（點擊任一果品跳轉至 Tab 1 品項觀測）</h3>
+              <select id="regCropSort">
+                <option value="b_desc">依 期B 規模排序</option>
+                <option value="diff_desc">依 Δ 增加最多排序</option>
+                <option value="diff_asc">依 Δ 減少最多排序</option>
+              </select>
+            </div>
+            <div class="table-scroll" style="max-height:245px;">
+              <table class="sci-table">
+                <thead>
+                  <tr>
+                    <th>果品 (代碼)</th>
+                    <th>分類群組</th>
+                    <th class="num">期A 均</th>
+                    <th class="num">期B 均</th>
+                    <th class="num">Δ 變化</th>
+                    <th class="num">% 變化</th>
+                    <th class="num">區內佔比(B)</th>
+                    <th class="num">Sen's Slope (/10yr)</th>
+                  </tr>
+                </thead>
+                <tbody id="regCropTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: SYNTHESIS, HOTSPOTS & QC AUDIT (研究專題洞察與品管稽核)       -->
+    <!-- =================================================================== -->
+    <section class="tab-pane" id="pane-synthesis">
+      <!-- Module S1: Focal Crop Family Deep-Dives (29-Year Upgraded) -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title">專題一｜重點果品族群 29 年結構拆解（1997–2025）</h3>
+          <div class="ctrl-group" id="synFamilyBtns">
+            <button class="btn active" data-fam="citrus">柑橘細項 (不含文旦及柚類, 12項)</button>
+            <button class="btn" data-fam="wendan">文旦柚獨立專區 (607 + 其他柚類對照)</button>
+            <button class="btn" data-fam="grape">葡萄全品項 (鮮食 vs 釀酒, 5項)</button>
+            <button class="btn" data-fam="mango">芒果專區 (改良種 vs 本地種, 2項)</button>
+            <button class="btn" data-fam="sugar">番荔枝/釋迦跨年整合 (642/652/653)</button>
+            <button class="btn" data-fam="macro_compare">大宗溫帶需冷 vs 熱帶常綠指標</button>
+          </div>
+        </div>
+        <div class="grid-2col">
+          <div>
+            <div id="synFamilySummary" class="method-note" style="margin-bottom:8px;"></div>
+            <div id="chartSynFamily" class="chart-h340"></div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);margin-bottom:6px;">族群內各品項 29 年統計與緯度質心檢定（依當前設定之 期A vs 期B）</div>
+            <div class="table-scroll" style="max-height:365px;">
+              <table class="sci-table">
+                <thead>
+                  <tr>
+                    <th>果品 (代碼)</th>
+                    <th class="num">期A 均</th>
+                    <th class="num">期B 均</th>
+                    <th class="num">Δ (%)</th>
+                    <th class="num">質心 ΔLat (km)</th>
+                    <th class="num">Sen's (km/10yr)</th>
+                    <th class="num">MK p-val</th>
+                  </tr>
+                </thead>
+                <tbody id="synFamilyTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module S2: Cross-Crop Centroid Shift Quadrant + Transition Hotspots -->
+      <div class="grid-2col">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">專題二｜果品規模消長 vs. 緯度質心遷移象限圖 (主力品項 &ge;100 ha)</h3>
+            <span class="code-tag">實心外框 = 緯度 Mann-Kendall p &lt; 0.05</span>
+          </div>
+          <div id="chartSynScatter" class="chart-h380"></div>
+          <div class="method-note" style="margin-top:6px;">
+            橫軸為跨期變化率（期A → 期B，截尾至 ±250% 便於判讀），縱軸為 1997–2025 面積加權緯度質心之無母數 <b>Theil-Sen 斜率（km / 10年）</b>；正值代表產區重心北移，負值代表南移。點擊氣泡可直接跳轉至 Tab 1 檢視該作物。
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">專題三｜潛在 A→B 轉作熱點鄉鎮矩陣（依當前 期A vs 期B 動態篩選）</h3>
+            <div class="ctrl-group">
+              <label style="font-size:0.78rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" id="chkHotspotBetel" /> 納入檳榔退場
+              </label>
+              <input type="text" id="synHotspotSearch" placeholder="篩選鄉鎮..." style="width:115px;" />
+            </div>
+          </div>
+          <div class="table-scroll" style="max-height:365px;">
+            <table class="sci-table">
               <thead>
                 <tr>
                   <th>鄉鎮 (區域)</th>
-                  <th>前5年 → 近5年 (ha)</th>
-                  <th>淨變化</th>
-                  <th>主要品項結構</th>
+                  <th>顯著縮減品項 (Period A → B)</th>
+                  <th>顯著擴張品項 (Period A → B)</th>
+                  <th class="num">轉作指數</th>
                 </tr>
               </thead>
-              <tbody id="familyTownTbody"></tbody>
+              <tbody id="synHotspotTbody"></tbody>
             </table>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 模組 3：空間地圖與質心北移 -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title"><span class="step-tag">模組 3</span> 單一作物鄉鎮空間分佈與「產區北移」量化軌跡</h2>
-        <div class="controls">
-          <label for="cropSelect" style="font-size:0.85rem;color:var(--muted);">選擇作物 (33項)：</label>
-          <select id="cropSelect"></select>
-          <select id="mapModeSelect">
-            <option value="diff">面積增減 (近5年 − 前5年)</option>
-            <option value="recent">近 5 年平均種植面積</option>
-          </select>
-        </div>
-      </div>
-      <div class="grid-map">
-        <div>
-          <div style="font-size:0.84rem;color:var(--muted);margin-bottom:4px;">點擊地圖上的任一鄉鎮，可於下方「模組 4」查看該鄉鎮 33 項果樹歷年結構</div>
-          <div id="chartMap" class="map-box"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div id="centroidStatBox" class="town-summary-bar"></div>
-          <div id="chartCentroid" class="sub-chart-box"></div>
-          <div id="chartRegionStack" class="sub-chart-box"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 模組 4：A->B 轉作熱點鄉鎮 -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title"><span class="step-tag">模組 4</span> 潛在 A→B 轉作熱點鄉鎮清單（對接 Step 2 Land Cover 套疊與 Step 3 訪談）</h2>
-        <div class="controls">
-          <select id="regionFilter">
-            <option value="ALL">全部區域</option>
-            <option value="北部">北部</option>
-            <option value="中部">中部</option>
-            <option value="南部">南部</option>
-            <option value="東部">東部</option>
-          </select>
-          <input type="text" id="townSearchInput" placeholder="搜尋全台 368 鄉鎮 (如 古坑、麻豆、二林、六龜)..." style="width:265px;" />
-        </div>
-      </div>
-      <div class="grid-2">
-        <div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:21%;">鄉鎮 (區域)</th>
-                  <th style="width:37%;">顯著減少作物 (A)</th>
-                  <th style="width:36%;">顯著增加作物 (B)</th>
-                  <th style="width:6%;">訊號</th>
-                </tr>
-              </thead>
-              <tbody id="hotspotTbody"></tbody>
-            </table>
-          </div>
-          <div class="note-box">
-            <strong>訊號排序邏輯：</strong>納入完整柑橘 12 細項、文旦柚、葡萄 5 項與芒果 2 項後，優先挑選「同時出現溫帶／傳統柑橘／釀酒葡萄／土芒果大幅減少，且耐熱果樹／新興柑橘／改良種芒果大幅增加」的鄉鎮。點擊任一列可在右側檢視完整 18 年消長。
+          <div class="method-note" style="margin-top:6px;">
+            點擊任一列可直接跳轉至 <b>Tab 2 (Region Explorer)</b> 檢視該鄉鎮完整 29 年 56 項果品演變結構，支援 Step 2 Land Cover 圖資套疊與 Step 3 田野訪談選點。
           </div>
         </div>
-        <div>
-          <div id="townDetailHeader" class="town-summary-bar">請點擊左側表格或上方地圖任一鄉鎮</div>
-          <div id="chartTownDrill" class="chart-box" style="height:420px;"></div>
+      </div>
+
+      <!-- Module S3: Transparent QC Audit Log -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title">資料品管透明稽核表（QC Flagged Anomalies Audit Log, n = <span id="qcCountSpan">0</span>）</h3>
+          <span class="code-tag">可於上方導覽列隨時切換 QC-Cleaned ↔ Raw Official 驗證影響</span>
+        </div>
+        <div class="table-scroll" style="max-height:240px;">
+          <table class="sci-table">
+            <thead>
+              <tr>
+                <th>年份</th>
+                <th>行政區</th>
+                <th>果品 (代碼)</th>
+                <th>規則類型</th>
+                <th class="num">原始種植 (ha)</th>
+                <th class="num">QC 修正值 (ha)</th>
+                <th>判定依據與前後年脈絡</th>
+              </tr>
+            </thead>
+            <tbody id="qcAuditTbody"></tbody>
+          </table>
         </div>
       </div>
     </section>
   </main>
 
   <footer>
-    資料口徑與版本說明（v2.0）：採用農業部農情調查（UnitId=038）「種植面積（公頃）」，共涵蓋 33 項果樹代碼；文旦柚（607）獨立統計不混入一般柑橘類；已對齊 2010／2014 縣市升格行政區、去除 API 重複列，並針對單年登錄異常值插補修正。詳細改版紀錄與方法論請參閱專案內 <code>DASHBOARD_CHANGELOG.md</code>。
+    <div>
+      <strong>資料來源與方法論：</strong>整合農糧署「農情報告資源網」（民國 86–96 年 / 1997–2007）與農業部開放資料平臺 UnitId=038（民國 97–114 年 / 2008–2025），涵蓋 <code>03.全年作</code> 果品類全部 56 項官方代碼，並統一對齊至現行 368 鄉鎮市區邊界。
+    </div>
+    <div>
+      版本紀錄：<code>v3.0.0</code>｜詳見專案內 <code>DASHBOARD_CHANGELOG.md</code>（支援 Git Tag 歷史網頁回溯）
+    </div>
   </footer>
 
   <script>
-    const D = window.DASHBOARD_DATA;
+    // =========================================================================
+    // 0. 資料載入與索引建構
+    // =========================================================================
+    const A = window.ATLAS_DATA;
     const TOPO = window.TAIWAN_TOPO;
+    const YEARS = A.years;
+    const N_YRS = YEARS.length;
 
-    document.getElementById("verBadge").textContent = `v${D.version || "2.0"} (${D.updated_at || ""})`;
+    document.getElementById("verPill").textContent = `v${A.version}`;
+    document.getElementById("qcCountSpan").textContent = A.qc_flags.length;
 
-    let currentCategory = "MAJOR";
-    let currentBarMetric = "ha";
-    let currentFamily = "citrus";
-    let familyViewMode = "detail"; // "detail" | "group" | "minor"
-    let currentCrop = "文旦柚";
-    let currentMapMode = "diff";
-    let selectedTownKey = D.switch_hotspots.length ? D.switch_hotspots[0].key : Object.keys(D.towns)[0];
+    // 建立快速查詢結構：
+    // rawDiffMap[`${ti}_${ci}_${yi}`] = [raw_p, raw_h, raw_pt, flagType, note]
+    const rawDiffMap = new Map();
+    A.qc_flags.forEach(fl => {
+      const [yr, ti, ci, ftype, rp, qp, rh, qh, rpt, qpt, note] = fl;
+      const yi = YEARS.indexOf(yr);
+      if (yi >= 0) rawDiffMap.set(`${ti}_${ci}_${yi}`, [rp, rh, rpt, ftype, note, qp]);
+    });
 
-    const cropMap = {};
-    D.crops.forEach(c => { cropMap[c.crop] = c; });
+    // cropTownMap[ci] = Map(ti -> [p_arr, h_arr, pt_arr])
+    const cropTownMap = A.crops.map(() => new Map());
+    // townCropMap[ti] = Map(ci -> [p_arr, h_arr, pt_arr])
+    const townCropMap = A.towns.map(() => new Map());
 
-    const chartMacroLines = echarts.init(document.getElementById("chartMacroLines"));
-    const chartMacroBar = echarts.init(document.getElementById("chartMacroBar"));
-    const chartFamilyMain = echarts.init(document.getElementById("chartFamilyMain"));
-    const chartMap = echarts.init(document.getElementById("chartMap"));
-    const chartCentroid = echarts.init(document.getElementById("chartCentroid"));
-    const chartRegionStack = echarts.init(document.getElementById("chartRegionStack"));
-    const chartTownDrill = echarts.init(document.getElementById("chartTownDrill"));
+    A.series.forEach((list, ci) => {
+      list.forEach(([ti, pArr, hArr, ptArr]) => {
+        const rec = [pArr, hArr, ptArr];
+        cropTownMap[ci].set(ti, rec);
+        townCropMap[ti].set(ci, rec);
+      });
+    });
 
+    const codeToCi = {};
+    const nameToCi = {};
+    A.crops.forEach((c, idx) => {
+      codeToCi[c.code] = idx;
+      nameToCi[c.name] = idx;
+    });
+
+    // 跨品項總計時：使用「642+ 番荔枝(釋迦合計)」，排除已包含於其中的子代碼 642, 652, 653 避免重複計算
+    const ATOMIC_SUGAR_CODES = new Set(["642", "652", "653"]);
+
+    // 註冊台灣 368 鄉鎮地圖
     const geoJson = topojson.feature(TOPO, TOPO.objects.towns);
+    const townKeyToTi = {};
+    A.towns.forEach((t, ti) => { townKeyToTi[`${t[0]}|${t[1]}`] = ti; });
     geoJson.features.forEach(f => {
       const c = f.properties.COUNTYNAME.trim().replace(/台/g, "臺");
       const t = f.properties.TOWNNAME.trim().replace(/台/g, "臺");
       f.properties.name = `${c}|${t}`;
-      f.properties.label = `${c}${t}`;
     });
     echarts.registerMap("TW_TOWNS", geoJson);
 
-    function fmtSign(v, unit = "") {
-      return `${v > 0 ? "+" : ""}${v.toLocaleString()}${unit}`;
+    // =========================================================================
+    // 1. 全域狀態 (State)
+    // =========================================================================
+    const state = {
+      activeTab: "crop",
+      metric: "planted", // planted | harvested | ratio | yield | prod
+      yrA1: 1997, yrA2: 2006,
+      yrB1: 2016, yrB2: 2025,
+      qcMode: "qc",      // qc | raw
+      palette: "std",    // std | cb
+
+      // Tab 1: Crop Explorer
+      primaryCi: codeToCi["607"], // 預設文旦柚或使用者任意切換
+      compareCis: [codeToCi["604"], codeToCi["615"], codeToCi["621"]], // 柳橙, 茂谷柑, 改良種芒果
+      tsNorm: "abs",     // abs | idx | z
+      cropSubMode: "centroid", // centroid | lon | region
+      cropMapMode: "diff",     // diff | pct | b_mean | a_mean | year
+      mapScale: "linear",      // linear | log | p95
+      snapYear: 2025,
+      playTimer: null,
+
+      // Tab 2: Region Explorer
+      regRegion: "ALL",
+      regCounty: "ALL",
+      regTownTi: -1, // -1 = 依區域/縣市彙整
+      includeBetel: false,
+      regMapMode: "dom_b",
+      regTsMode: "stack",
+
+      // Tab 3: Synthesis
+      synFamily: "citrus",
+      hotspotBetel: false,
+    };
+
+    const METRIC_META = {
+      planted:   { label: "種植面積", unit: "ha", digits: 1 },
+      harvested: { label: "收穫面積", unit: "ha", digits: 1 },
+      ratio:     { label: "收穫率",   unit: "%",  digits: 1 },
+      yield:     { label: "單位產量", unit: "kg/ha", digits: 0 },
+      prod:      { label: "總收量",   unit: "t",  digits: 1 },
+    };
+
+    const PALETTES = {
+      std: {
+        seq: ["#f7fbff", "#c7e9b4", "#41b6c4", "#225ea8", "#081d58"],
+        div: ["#2166ac", "#67a9cf", "#f7f7f7", "#ef8a62", "#b2182b"],
+      },
+      cb: {
+        seq: ["#ffffcc", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"],
+        div: ["#01665e", "#5ab4ac", "#f5f5f5", "#d8b365", "#8c510a"],
+      }
+    };
+
+    const SERIES_COLORS = [
+      "#0f4c81", "#b2182b", "#1b7837", "#d95f02", "#7570b3",
+      "#008837", "#e7298a", "#66a61e", "#e6ab02", "#a6761d", "#475569"
+    ];
+
+    // =========================================================================
+    // 2. 數值讀取與科學統計核心函式 (OLS, Mann-Kendall, Theil-Sen, HHI, Shannon)
+    // =========================================================================
+    function getCellRawOrQc(ti, ci, yi) {
+      const rec = cropTownMap[ci].get(ti);
+      let p = rec ? rec[0][yi] : 0;
+      let h = rec ? rec[1][yi] : 0;
+      let pt = rec ? rec[2][yi] : 0;
+      if (state.qcMode === "raw") {
+        const diff = rawDiffMap.get(`${ti}_${ci}_${yi}`);
+        if (diff) { p = diff[0]; h = diff[1]; pt = diff[2]; }
+      }
+      return [p, h, pt];
     }
 
-    // 1. KPI 卡片
-    function renderKPIs() {
-      const fam = D.families;
-      const cEarly = fam.citrus.total_yearly_ha.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
-      const cRecent = fam.citrus.total_yearly_ha.slice(-5).reduce((a, b) => a + b, 0) / 5;
-      const cPct = ((cRecent - cEarly) / cEarly * 100).toFixed(1);
+    function computeMetricFromPHPT(p, h, pt, metric = state.metric) {
+      if (metric === "planted") return p;
+      if (metric === "harvested") return h;
+      if (metric === "prod") return pt;
+      if (metric === "ratio") return p > 0 ? Math.min(100, (h / p) * 100) : 0;
+      if (metric === "yield") return h > 0 ? (pt * 1000) / h : 0;
+      return p;
+    }
 
-      const wendan = cropMap["文旦柚"];
-      const gEarly = fam.grape.total_yearly_ha.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
-      const gRecent = fam.grape.total_yearly_ha.slice(-5).reduce((a, b) => a + b, 0) / 5;
-      const gPct = ((gRecent - gEarly) / gEarly * 100).toFixed(1);
+    // 取得某作物全台 (或特定鄉鎮集合) 29 年時間序列
+    function getCropNationalSeries(ci, metric = state.metric) {
+      const pSum = new Float64Array(N_YRS);
+      const hSum = new Float64Array(N_YRS);
+      const ptSum = new Float64Array(N_YRS);
+      let qcHits = [];
 
-      const mImp = cropMap["改良種芒果"];
-      const mNat = cropMap["本地種芒果"];
-
-      const sortedHa = [...D.crops].sort((a, b) => b.diff_ha - a.diff_ha);
-      const topGain = sortedHa[0];
-      const topLoss = sortedHa[sortedHa.length - 1];
-
-      const cards = [
-        {
-          label: "柑橘類合計（不含文旦及柚類）",
-          value: `${cPct >= 0 ? "+" : ""}${cPct}%`,
-          sub: `${Math.round(cEarly).toLocaleString()} → ${Math.round(cRecent).toLocaleString()} ha（共 12 細項）`,
-          cls: cPct >= 0 ? "kpi-gain" : "kpi-loss"
-        },
-        {
-          label: "文旦柚（獨立追蹤 607）",
-          value: `${wendan.pct_change >= 0 ? "+" : ""}${wendan.pct_change}%`,
-          sub: `${wendan.early_avg_ha.toLocaleString()} → ${wendan.recent_avg_ha.toLocaleString()} ha｜質心 ${fmtSign(wendan.net_north_km, " km")}`,
-          cls: wendan.pct_change >= 0 ? "kpi-gain" : "kpi-loss"
-        },
-        {
-          label: "葡萄類合計（5 細項）",
-          value: `${gPct}%`,
-          sub: `${Math.round(gEarly).toLocaleString()} → ${Math.round(gRecent).toLocaleString()} ha（鮮食 + 釀酒）`,
-          cls: gPct >= 0 ? "kpi-gain" : "kpi-loss"
-        },
-        {
-          label: "芒果類（改良種 vs 本地種）",
-          value: `改良 ${fmtSign(mImp.pct_change, "%")} / 土芒 ${fmtSign(mNat.pct_change, "%")}`,
-          sub: `改良 ${mImp.recent_avg_ha.toLocaleString()} ha｜本地種 ${mNat.recent_avg_ha.toLocaleString()} ha`,
-          cls: "kpi-gain"
-        },
-        {
-          label: "面積增減極端品項",
-          value: `+${Math.round(topGain.diff_ha)} / ${Math.round(topLoss.diff_ha)} ha`,
-          sub: `最擴張：${topGain.crop}｜最縮減：${topLoss.crop}`,
-          cls: ""
+      cropTownMap[ci].forEach((rec, ti) => {
+        for (let yi = 0; yi < N_YRS; yi++) {
+          const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+          pSum[yi] += p;
+          hSum[yi] += h;
+          ptSum[yi] += pt;
+          if (rawDiffMap.has(`${ti}_${ci}_${yi}`)) {
+            qcHits.push({ yi, yr: YEARS[yi], ti, info: rawDiffMap.get(`${ti}_${ci}_${yi}`) });
+          }
         }
-      ];
-      document.getElementById("kpiGrid").innerHTML = cards.map(c => `
-        <div class="kpi-card">
-          <div class="kpi-label">${c.label}</div>
-          <div class="kpi-value ${c.cls || ""}">${c.value}</div>
-          <div class="kpi-sub">${c.sub}</div>
-        </div>
-      `).join("");
-    }
-
-    // 2. 模組 1：全台消長
-    function getFilteredMacroCrops() {
-      if (currentCategory === "ALL") return D.crops;
-      if (currentCategory === "MAJOR") {
-        return D.crops.filter(c => Math.max(c.early_avg_ha, c.recent_avg_ha) >= 200);
-      }
-      if (currentCategory === "耐熱/熱帶") {
-        return D.crops.filter(c => c.category === "耐熱/熱帶" || c.category === "傳統大宗");
-      }
-      return D.crops.filter(c => c.category === currentCategory);
-    }
-
-    function renderMacro() {
-      const list = getFilteredMacroCrops();
-
-      chartMacroLines.setOption({
-        tooltip: { trigger: "axis" },
-        legend: { type: "scroll", bottom: 0, textStyle: { fontSize: 11 } },
-        grid: { top: 20, left: 62, right: 20, bottom: 52 },
-        xAxis: { type: "category", data: D.years },
-        yAxis: { type: "value", name: "公頃", axisLabel: { formatter: v => v.toLocaleString() } },
-        series: list.map(c => ({
-          name: c.crop,
-          type: "line",
-          smooth: 0.2,
-          symbolSize: 4,
-          data: c.yearly.map(y => y.planted_ha)
-        }))
-      }, true);
-
-      const sorted = [...list].sort((a, b) =>
-        currentBarMetric === "pct" ? a.pct_change - b.pct_change : a.diff_ha - b.diff_ha
-      );
-      chartMacroBar.setOption({
-        tooltip: {
-          trigger: "axis",
-          axisPointer: { type: "shadow" },
-          formatter: params => {
-            const p = params[0];
-            const c = sorted[p.dataIndex];
-            return `<b>${c.crop}</b> [代碼 ${c.code}｜${c.category}]<br/>前5年均：${c.early_avg_ha.toLocaleString()} ha<br/>近5年均：${c.recent_avg_ha.toLocaleString()} ha<br/>增減：<b>${fmtSign(c.diff_ha, " ha")}</b> (${fmtSign(c.pct_change, "%")})<br/>質心北移：${fmtSign(c.net_north_km, " km")}`;
-          }
-        },
-        grid: { top: 14, left: 90, right: 48, bottom: 28 },
-        xAxis: { type: "value", axisLabel: { formatter: v => currentBarMetric === "pct" ? `${v}%` : v.toLocaleString() } },
-        yAxis: { type: "category", data: sorted.map(c => c.crop), axisLabel: { fontSize: list.length > 20 ? 10 : 11 } },
-        series: [{
-          type: "bar",
-          data: sorted.map(c => {
-            const val = currentBarMetric === "pct" ? c.pct_change : c.diff_ha;
-            return {
-              value: val,
-              itemStyle: { color: val >= 0 ? "#dc2626" : "#2563eb", borderRadius: val >= 0 ? [0,4,4,0] : [4,0,0,4] }
-            };
-          }),
-          label: {
-            show: list.length <= 22,
-            position: "right",
-            fontSize: 10.5,
-            formatter: p => currentBarMetric === "pct" ? `${p.value > 0 ? "+" : ""}${p.value}%` : `${p.value > 0 ? "+" : ""}${Math.round(p.value)}`
-          }
-        }]
-      }, true);
-    }
-
-    // 3. 模組 2：四大重點族群深度拆解
-    function renderFamilyControls() {
-      const box = document.getElementById("familySubControls");
-      if (currentFamily === "citrus") {
-        box.innerHTML = `
-          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">12 項柑橘個別曲線</button>
-          <button class="tab-btn ${familyViewMode === 'group' ? 'active' : ''}" data-mode="group">甜橙/寬皮 vs 酸柑/金柑 堆疊</button>
-        `;
-      } else if (currentFamily === "wendan") {
-        box.innerHTML = `
-          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">文旦柚 北/中/南/東 產區消長</button>
-          <button class="tab-btn ${familyViewMode === 'group' ? 'active' : ''}" data-mode="group">文旦柚 vs 其他柚類(白柚/葡萄柚/斗柚)</button>
-        `;
-      } else if (currentFamily === "grape") {
-        box.innerHTML = `
-          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">全部 5 種葡萄總覽</button>
-          <button class="tab-btn ${familyViewMode === 'minor' ? 'active' : ''}" data-mode="minor">放大檢視：釀酒葡萄(金香/黑后)與小宗品種</button>
-        `;
-      } else {
-        box.innerHTML = `
-          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">改良種 vs 本地種 面積折線</button>
-          <button class="tab-btn ${familyViewMode === 'group' ? 'active' : ''}" data-mode="group">芒果總面積堆疊演變</button>
-        `;
-      }
-      box.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          familyViewMode = btn.dataset.mode;
-          renderFamilyModule();
-        });
       });
+
+      const out = new Array(N_YRS);
+      for (let yi = 0; yi < N_YRS; yi++) {
+        out[yi] = Number(computeMetricFromPHPT(pSum[yi], hSum[yi], ptSum[yi], metric).toFixed(2));
+      }
+      return { values: out, pSum, hSum, ptSum, qcHits };
     }
 
-    function renderFamilyModule() {
-      renderFamilyControls();
-      const fam = D.families[currentFamily];
-      const eTotal = fam.total_yearly_ha.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
-      const rTotal = fam.total_yearly_ha.slice(-5).reduce((a, b) => a + b, 0) / 5;
-      const diffTotal = rTotal - eTotal;
-      const pctTotal = eTotal > 0 ? (diffTotal / eTotal * 100) : 0;
+    // 計算面積加權空間質心 (29 年 lon, lat) 與區域堆疊
+    function getCropSpatialTrajectory(ci) {
+      const lats = new Array(N_YRS).fill(null);
+      const lons = new Array(N_YRS).fill(null);
+      const regSeries = { "北部": new Float64Array(N_YRS), "中部": new Float64Array(N_YRS), "南部": new Float64Array(N_YRS), "東部": new Float64Array(N_YRS) };
 
-      document.getElementById("familySummaryBar").innerHTML = `
-        <strong>${fam.title}</strong><br/>
-        前 5 年平均（2008–2012）：<b>${Math.round(eTotal).toLocaleString()} ha</b> →
-        近 5 年平均（2021–2025）：<b>${Math.round(rTotal).toLocaleString()} ha</b>
-        （淨變化：<b style="color:${diffTotal >= 0 ? '#dc2626' : '#2563eb'}">${fmtSign(Math.round(diffTotal), " ha")} ／ ${fmtSign( Number(pctTotal.toFixed(1)), "%" )}</b>）
+      for (let yi = 0; yi < N_YRS; yi++) {
+        let wSum = 0, wLat = 0, wLon = 0;
+        cropTownMap[ci].forEach((_, ti) => {
+          const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+          const w = state.metric === "prod" ? pt : (state.metric === "harvested" ? h : p);
+          if (w > 0) {
+            const [, , reg, lon, lat] = A.towns[ti];
+            wSum += w;
+            wLon += w * lon;
+            wLat += w * lat;
+            if (regSeries[reg]) regSeries[reg][yi] += computeMetricFromPHPT(p, h, pt);
+          }
+        });
+        if (wSum > 0) {
+          lats[yi] = Number((wLat / wSum).toFixed(4));
+          lons[yi] = Number((wLon / wSum).toFixed(4));
+        }
+      }
+      return { lats, lons, regSeries };
+    }
+
+    function periodMean(arr, y1, y2) {
+      let s = 0, n = 0;
+      for (let yi = 0; yi < N_YRS; yi++) {
+        const y = YEARS[yi];
+        if (y >= y1 && y <= y2 && arr[yi] !== null && !isNaN(arr[yi])) {
+          s += arr[yi];
+          n++;
+        }
+      }
+      return n > 0 ? s / n : 0;
+    }
+
+    function periodSD(arr, y1, y2) {
+      const vals = [];
+      for (let yi = 0; yi < N_YRS; yi++) {
+        const y = YEARS[yi];
+        if (y >= y1 && y <= y2 && arr[yi] !== null && !isNaN(arr[yi])) vals.push(arr[yi]);
+      }
+      if (vals.length < 2) return 0;
+      const m = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const v = vals.reduce((a, x) => a + (x - m) ** 2, 0) / (vals.length - 1);
+      return Math.sqrt(v);
+    }
+
+    // 互補誤差函數 erfc 供常態分佈雙尾 p-value 精確計算
+    function erfc(x) {
+      const z = Math.abs(x);
+      const t = 1 / (1 + 0.5 * z);
+      const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 +
+        t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 +
+        t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+      return x >= 0 ? r : 2 - r;
+    }
+
+    function normalTwoTailedP(z) {
+      return Math.min(1, Math.max(0, erfc(Math.abs(z) / Math.SQRT2)));
+    }
+
+    // OLS 線性迴歸
+    function olsStats(xs, ys) {
+      const pts = [];
+      for (let i = 0; i < xs.length; i++) {
+        if (ys[i] !== null && ys[i] !== undefined && !isNaN(ys[i])) pts.push([xs[i], ys[i]]);
+      }
+      const n = pts.length;
+      if (n < 3) return { slope: 0, r2: 0, p: 1 };
+      const mx = pts.reduce((a, p) => a + p[0], 0) / n;
+      const my = pts.reduce((a, p) => a + p[1], 0) / n;
+      let sxx = 0, sxy = 0, syy = 0;
+      pts.forEach(([x, y]) => {
+        sxx += (x - mx) ** 2;
+        sxy += (x - mx) * (y - my);
+        syy += (y - my) ** 2;
+      });
+      if (sxx === 0 || syy === 0) return { slope: 0, r2: 0, p: 1 };
+      const slope = sxy / sxx;
+      const r2 = (sxy * sxy) / (sxx * syy);
+      const sse = Math.max(0, syy - slope * sxy);
+      const se = Math.sqrt((sse / (n - 2)) / sxx);
+      const tStat = se > 0 ? Math.abs(slope / se) : 0;
+      // 自由度 ~27 下以 Cornifish-Fisher 修正轉常態求雙尾 p-value
+      const df = n - 2;
+      const zApprox = tStat * (1 - 1 / (4 * df)) / Math.sqrt(1 + (tStat * tStat) / (2 * df));
+      return { slope, r2, p: normalTwoTailedP(zApprox) };
+    }
+
+    // 無母數 Mann-Kendall 趨勢檢定 + Theil-Sen 穩健中位數斜率
+    function mkAndSen(xs, ys) {
+      const pts = [];
+      for (let i = 0; i < xs.length; i++) {
+        if (ys[i] !== null && ys[i] !== undefined && !isNaN(ys[i])) pts.push([xs[i], ys[i]]);
+      }
+      const n = pts.length;
+      if (n < 4) return { tau: 0, z: 0, p: 1, sen: 0 };
+
+      let S = 0;
+      const slopes = [];
+      for (let i = 0; i < n - 1; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const dy = pts[j][1] - pts[i][1];
+          const dx = pts[j][0] - pts[i][0];
+          if (dx !== 0) slopes.push(dy / dx);
+          if (dy > 0) S++;
+          else if (dy < 0) S--;
+        }
+      }
+      slopes.sort((a, b) => a - b);
+      const mid = Math.floor(slopes.length / 2);
+      const sen = slopes.length % 2 !== 0 ? slopes[mid] : (slopes[mid - 1] + slopes[mid]) / 2;
+
+      // Tie correction for Var(S)
+      const counts = new Map();
+      pts.forEach(([, y]) => {
+        const k = y.toFixed(4);
+        counts.set(k, (counts.get(k) || 0) + 1);
+      });
+      let tieSum = 0;
+      counts.forEach(t => { if (t > 1) tieSum += t * (t - 1) * (2 * t + 5); });
+      const varS = (n * (n - 1) * (2 * n + 5) - tieSum) / 18;
+      let z = 0;
+      if (varS > 0) {
+        if (S > 0) z = (S - 1) / Math.sqrt(varS);
+        else if (S < 0) z = (S + 1) / Math.sqrt(varS);
+      }
+      const tau = S / (0.5 * n * (n - 1));
+      return { tau, z, p: normalTwoTailedP(z), sen };
+    }
+
+    function fmtNum(v, d = 1) {
+      if (v === null || v === undefined || isNaN(v)) return "—";
+      return Number(v.toFixed(d)).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+    }
+    function fmtSign(v, d = 1, unit = "") {
+      if (v === null || v === undefined || isNaN(v)) return "—";
+      const n = Number(v.toFixed(d));
+      return `${n > 0 ? "+" : ""}${n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d })}${unit}`;
+    }
+    function fmtP(p) {
+      if (p < 0.001) return "<0.001***";
+      if (p < 0.01) return `${p.toFixed(3)}**`;
+      if (p < 0.05) return `${p.toFixed(3)}*`;
+      return p.toFixed(3);
+    }
+
+    // =========================================================================
+    // 3. ECharts 實例初始化
+    // =========================================================================
+    const chartCropTS = echarts.init(document.getElementById("chartCropTS"));
+    const chartCropSub = echarts.init(document.getElementById("chartCropSub"));
+    const chartCropMap = echarts.init(document.getElementById("chartCropMap"));
+    const chartRegMap = echarts.init(document.getElementById("chartRegMap"));
+    const chartRegTS = echarts.init(document.getElementById("chartRegTS"));
+    const chartSynFamily = echarts.init(document.getElementById("chartSynFamily"));
+    const chartSynScatter = echarts.init(document.getElementById("chartSynScatter"));
+
+    // =========================================================================
+    // 4. TAB 1: CROP EXPLORER 渲染邏輯
+    // =========================================================================
+    function getTownCropPeriodStats(ci) {
+      const rows = [];
+      let sumA = 0, sumB = 0;
+      const yiA1 = YEARS.indexOf(state.yrA1), yiA2 = YEARS.indexOf(state.yrA2);
+      const yiB1 = YEARS.indexOf(state.yrB1), yiB2 = YEARS.indexOf(state.yrB2);
+      const nA = yiA2 - yiA1 + 1, nB = yiB2 - yiB1 + 1;
+
+      cropTownMap[ci].forEach((_, ti) => {
+        let pA = 0, hA = 0, ptA = 0;
+        for (let yi = yiA1; yi <= yiA2; yi++) {
+          const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+          pA += p; hA += h; ptA += pt;
+        }
+        let pB = 0, hB = 0, ptB = 0;
+        for (let yi = yiB1; yi <= yiB2; yi++) {
+          const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+          pB += p; hB += h; ptB += pt;
+        }
+        const valA = computeMetricFromPHPT(pA / nA, hA / nA, ptA / nA);
+        const valB = computeMetricFromPHPT(pB / nB, hB / nB, ptB / nB);
+        const snapYi = YEARS.indexOf(state.snapYear);
+        const [sp, sh, spt] = getCellRawOrQc(ti, ci, snapYi);
+        const valSnap = computeMetricFromPHPT(sp, sh, spt);
+
+        if (valA > 0 || valB > 0 || valSnap > 0) {
+          sumA += valA;
+          sumB += valB;
+          const diff = valB - valA;
+          const pct = valA > 0.5 ? (diff / valA) * 100 : null;
+          rows.push({ ti, city: A.towns[ti][0], town: A.towns[ti][1], reg: A.towns[ti][2], valA, valB, diff, pct, valSnap });
+        }
+      });
+
+      // CR5 與 HHI 集中度 (僅面積與產量有加總佔比意義)
+      const sharesA = sumA > 0 ? rows.map(r => r.valA / sumA).sort((a, b) => b - a) : [];
+      const sharesB = sumB > 0 ? rows.map(r => r.valB / sumB).sort((a, b) => b - a) : [];
+      const cr5A = sharesA.slice(0, 5).reduce((a, b) => a + b, 0) * 100;
+      const cr5B = sharesB.slice(0, 5).reduce((a, b) => a + b, 0) * 100;
+      const hhiB = sharesB.reduce((a, s) => a + (s * 100) ** 2, 0);
+
+      rows.forEach(r => { r.shareB = sumB > 0 ? (r.valB / sumB) * 100 : 0; });
+      return { rows, cr5A, cr5B, hhiB, sumB };
+    }
+
+    function renderCropExplorer() {
+      const ci = state.primaryCi;
+      const crop = A.crops[ci];
+      const mMeta = METRIC_META[state.metric];
+      const nat = getCropNationalSeries(ci);
+      const spat = getCropSpatialTrajectory(ci);
+      const townStats = getTownCropPeriodStats(ci);
+
+      const meanA = periodMean(nat.values, state.yrA1, state.yrA2);
+      const sdA = periodSD(nat.values, state.yrA1, state.yrA2);
+      const meanB = periodMean(nat.values, state.yrB1, state.yrB2);
+      const sdB = periodSD(nat.values, state.yrB1, state.yrB2);
+      const diff = meanB - meanA;
+      const pct = meanA > 0 ? (diff / meanA) * 100 : 0;
+
+      const ols = olsStats(YEARS, nat.values);
+      const mk = mkAndSen(YEARS, nat.values);
+
+      const latMeanA = periodMean(spat.lats, state.yrA1, state.yrA2);
+      const latMeanB = periodMean(spat.lats, state.yrB1, state.yrB2);
+      const netNorthKm = (latMeanA && latMeanB) ? (latMeanB - latMeanA) * 111.32 : 0;
+      const mkLat = mkAndSen(YEARS, spat.lats);
+      const senLatKm10 = mkLat.sen * 111.32 * 10;
+
+      // 1. Stat Strip
+      const d = mMeta.digits;
+      document.getElementById("cropStatStrip").innerHTML = `
+        <div class="stat-cell">
+          <div class="stat-lbl">基準期 A (${state.yrA1}–${state.yrA2}) Mean ± SD</div>
+          <div class="stat-val">${fmtNum(meanA, d)} ${mMeta.unit}</div>
+          <div class="stat-meta">± ${fmtNum(sdA, d)}｜n=${state.yrA2 - state.yrA1 + 1} yrs</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">目標期 B (${state.yrB1}–${state.yrB2}) Mean ± SD</div>
+          <div class="stat-val">${fmtNum(meanB, d)} ${mMeta.unit}</div>
+          <div class="stat-meta">± ${fmtNum(sdB, d)}｜代碼 ${crop.code} (${crop.cat})</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">跨期淨變化 (Period B − A)</div>
+          <div class="stat-val ${diff >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(diff, d, ' ' + mMeta.unit)}</div>
+          <div class="stat-meta">相對變化率：<b>${fmtSign(pct, 1, '%')}</b></div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">29 年趨勢檢定 (Sen's Slope &amp; MK)</div>
+          <div class="stat-val ${mk.sen >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(mk.sen * 10, d)} /10yr</div>
+          <div class="stat-meta">MK τ=${mk.tau.toFixed(2)} (p=${fmtP(mk.p)})｜R²=${ols.r2.toFixed(2)}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">面積加權緯度質心遷移</div>
+          <div class="stat-val ${senLatKm10 >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(senLatKm10, 2, ' km/10yr')}</div>
+          <div class="stat-meta">Δ期=${fmtSign(netNorthKm, 2, ' km')}｜MK p=${fmtP(mkLat.p)}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">產區集中度 CR5 (前5大鄉鎮佔比)</div>
+          <div class="stat-val">${fmtNum(townStats.cr5B, 1)}%</div>
+          <div class="stat-meta">期A ${fmtNum(townStats.cr5A, 1)}% → 期B ${fmtNum(townStats.cr5B, 1)}%｜HHI=${Math.round(townStats.hhiB)}</div>
+        </div>
       `;
 
-      let tableCrops = fam.crops.map(n => cropMap[n]).filter(Boolean);
-      const noteEl = document.getElementById("familyNoteBox");
+      // 2. Compare Pills & Multi-Crop 29-Year Time Series
+      const cmpBox = document.getElementById("compareTagsBox");
+      cmpBox.innerHTML = state.compareCis.map(cci => `
+        <span class="cmp-pill">${A.crops[cci].name} (${A.crops[cci].code}) <span class="rm" data-ci="${cci}" title="移除">×</span></span>
+      `).join("");
+      cmpBox.querySelectorAll(".rm").forEach(el => {
+        el.addEventListener("click", () => {
+          const rmCi = Number(el.dataset.ci);
+          state.compareCis = state.compareCis.filter(x => x !== rmCi);
+          renderCropExplorer();
+        });
+      });
 
-      if (currentFamily === "citrus") {
-        noteEl.innerHTML = `<strong>柑橘類結構洞察（已排除文旦柚與其他柚類）：</strong>傳統大宗甜橙與寬皮柑（<b>柳橙、椪柑、桶柑、海梨柑、晚崙西亞橙</b>）面積顯著縮減，但在雲林、臺中等地部分轉往高單價晚熟柑橘（<b>茂谷柑</b>與<b>其他柑桔</b>如帝王柑、砂糖橘、佛利蒙柑）；同時南部屏東為主的酸柑桔類（<b>檸檬、萊姆、四季桔</b>）則呈現明顯擴張。`;
-        if (familyViewMode === "group") {
-          chartFamilyMain.setOption({
-            tooltip: { trigger: "axis" },
-            legend: { bottom: 0 },
-            grid: { top: 24, left: 60, right: 20, bottom: 48 },
-            xAxis: { type: "category", data: D.years },
-            yAxis: { type: "value", name: "公頃" },
-            series: fam.subgroups.map((sg, i) => ({
-              name: sg.name,
-              type: "line",
-              stack: "citrus",
-              areaStyle: { opacity: 0.45 },
-              itemStyle: { color: i === 0 ? "#ea580c" : "#16a34a" },
-              data: sg.yearly_ha
-            }))
-          }, true);
-        } else {
-          chartFamilyMain.setOption({
-            tooltip: { trigger: "axis" },
-            legend: { type: "scroll", bottom: 0, textStyle: { fontSize: 11 } },
-            grid: { top: 24, left: 60, right: 20, bottom: 48 },
-            xAxis: { type: "category", data: D.years },
-            yAxis: { type: "value", name: "公頃" },
-            series: tableCrops.map(c => ({
-              name: c.crop,
-              type: "line",
-              smooth: 0.2,
-              data: c.yearly.map(y => y.planted_ha)
-            }))
-          }, true);
+      const allPlotCis = [ci, ...state.compareCis.filter(x => x !== ci)];
+      const tsSeries = allPlotCis.map((pci, idx) => {
+        const sObj = pci === ci ? nat : getCropNationalSeries(pci);
+        let plotData = sObj.values;
+        if (state.tsNorm === "idx") {
+          const base = periodMean(sObj.values, state.yrA1, state.yrA2);
+          plotData = sObj.values.map(v => base > 0 ? Number(((v / base) * 100).toFixed(1)) : 0);
+        } else if (state.tsNorm === "z") {
+          const m = periodMean(sObj.values, 1997, 2025);
+          const sd = periodSD(sObj.values, 1997, 2025);
+          plotData = sObj.values.map(v => sd > 0 ? Number(((v - m) / sd).toFixed(2)) : 0);
         }
-      } else if (currentFamily === "wendan") {
-        const wObj = cropMap["文旦柚"];
-        const otherPomelos = (fam.other_pomelos || []).map(n => cropMap[n]).filter(Boolean);
-        tableCrops = [wObj, ...otherPomelos];
-        noteEl.innerHTML = `<strong>文旦柚獨立處理說明：</strong>文旦柚（代碼 <code>607</code>）因節令產銷特性（白露與中秋節氣）、老欉樹齡結構與區域品牌（麻豆、瑞穗、鶴岡、斗六、西湖、八里、冬山）與一般柑橘截然不同，故獨立拆出追蹤，不併入柑橘總計。右側上半表另附白柚（609）、葡萄柚（612）、斗柚（608）供柚類內部比較；下半表則純粹統計<b>文旦柚（607）</b>全台 Top 15 鄉鎮消長。`;
 
-        if (familyViewMode === "detail") {
-          const regs = ["南部", "東部", "中部", "北部"];
-          const regColors = { "南部": "#ea580c", "東部": "#9333ea", "中部": "#16a34a", "北部": "#0284c7" };
-          chartFamilyMain.setOption({
-            tooltip: { trigger: "axis" },
-            legend: { bottom: 0 },
-            grid: { top: 24, left: 60, right: 20, bottom: 48 },
-            xAxis: { type: "category", data: D.years },
-            yAxis: { type: "value", name: "文旦柚面積 (公頃)" },
-            series: regs.map(r => ({
-              name: `${r}產區`,
-              type: "line",
-              stack: "wendan_reg",
-              areaStyle: { opacity: 0.5 },
-              itemStyle: { color: regColors[r] },
-              data: wObj.yearly.map(y => y.regions[r] || 0)
-            }))
-          }, true);
-        } else {
-          chartFamilyMain.setOption({
-            tooltip: { trigger: "axis" },
-            legend: { bottom: 0 },
-            grid: { top: 24, left: 60, right: 20, bottom: 48 },
-            xAxis: { type: "category", data: D.years },
-            yAxis: { type: "value", name: "公頃" },
-            series: tableCrops.map(c => ({
-              name: c.crop === "文旦柚" ? "文旦柚 (獨立主軸)" : `${c.crop} (其他柚類對照)`,
-              type: "line",
-              smooth: 0.2,
-              lineStyle: { width: c.crop === "文旦柚" ? 3.2 : 1.8, type: c.crop === "文旦柚" ? "solid" : "dashed" },
-              data: c.yearly.map(y => y.planted_ha)
-            }))
-          }, true);
+        // 標記該作物有發生 QC 修正之年份點位
+        const qcYrSet = new Set(sObj.qcHits.map(h => h.yi));
+        const formattedData = plotData.map((v, yi) => qcYrSet.has(yi) ? {
+          value: v,
+          symbol: "emptyDiamond",
+          symbolSize: 8,
+        } : v);
+
+        const extraMarkArea = idx === 0 ? {
+          silent: true,
+          data: [
+            [{ xAxis: String(state.yrA1), itemStyle: { color: "rgba(33,102,172,0.07)" } }, { xAxis: String(state.yrA2) }],
+            [{ xAxis: String(state.yrB1), itemStyle: { color: "rgba(178,24,43,0.07)" } }, { xAxis: String(state.yrB2) }]
+          ]
+        } : undefined;
+
+        const extraMarkLine = idx === 0 ? {
+          silent: true,
+          symbol: "none",
+          lineStyle: { type: "dashed", color: "#94a3b8", width: 1 },
+          label: { formatter: "2002 WTO", fontSize: 10, color: "#64748b" },
+          data: [{ xAxis: "2002" }]
+        } : undefined;
+
+        return {
+          name: `${A.crops[pci].name}`,
+          type: "line",
+          smooth: 0.15,
+          symbolSize: idx === 0 ? 5 : 4,
+          lineStyle: { width: idx === 0 ? 2.6 : 1.7, type: idx === 0 ? "solid" : "solid" },
+          itemStyle: { color: SERIES_COLORS[idx % SERIES_COLORS.length] },
+          data: formattedData,
+          markArea: extraMarkArea,
+          markLine: extraMarkLine,
+        };
+      });
+
+      const yAxisUnit = state.tsNorm === "idx" ? "Index (A=100)" : (state.tsNorm === "z" ? "Z-Score (σ)" : mMeta.unit);
+      chartCropTS.setOption({
+        tooltip: { trigger: "axis" },
+        legend: { bottom: 0, type: "scroll", textStyle: { fontSize: 11 } },
+        grid: { top: 22, left: 62, right: 18, bottom: 44 },
+        xAxis: { type: "category", data: YEARS.map(String) },
+        yAxis: { type: "value", name: yAxisUnit, scale: state.tsNorm === "z" },
+        series: tsSeries,
+      }, true);
+
+      // QC Notice
+      const qcBox = document.getElementById("cropQcNotice");
+      if (nat.qcHits.length > 0) {
+        const sample = nat.qcHits[0];
+        const tName = `${A.towns[sample.ti][0]}${A.towns[sample.ti][1]}`;
+        qcBox.style.display = "block";
+        qcBox.innerHTML = `<b>品管標記（◇ 空心菱形）：</b>本品項共有 <b>${nat.qcHits.length}</b> 筆鄉鎮年度異常紀錄（例如 ${sample.yr} 年 ${tName} 原始值 ${sample.info[0]} ha → QC 值 ${sample.info[5]} ha）。目前顯示模式：<b>${state.qcMode === 'qc' ? 'QC-Cleaned (已插補修正)' : 'Raw Official (原始未修正)'}</b>。`;
+      } else {
+        qcBox.style.display = "none";
+      }
+
+      // 3. Sub-Chart (Centroid Lat / Lon / Region Stack)
+      if (state.cropSubMode === "centroid" || state.cropSubMode === "lon") {
+        const isLat = state.cropSubMode === "centroid";
+        const arr = isLat ? spat.lats : spat.lons;
+        const mkC = mkAndSen(YEARS, arr);
+        // 繪製 Theil-Sen 趨勢線
+        const validPts = YEARS.map((y, i) => [y, arr[i]]).filter(p => p[1] !== null);
+        let trendLine = [];
+        if (validPts.length >= 2) {
+          const medX = validPts[Math.floor(validPts.length / 2)][0];
+          const medY = validPts[Math.floor(validPts.length / 2)][1];
+          trendLine = YEARS.map(y => Number((medY + mkC.sen * (y - medX)).toFixed(4)));
         }
-      } else if (currentFamily === "grape") {
-        noteEl.innerHTML = `<strong>葡萄類全品項洞察：</strong>農情調查共區分 5 個代碼——鮮食用<b>巨峰葡萄（629）</b>、早期鮮食<b>義大利葡萄（630）</b>、釀白酒用<b>金香葡萄（631）</b>、釀紅酒用<b>黑后葡萄（632）</b>及新品種<b>其他葡萄（633，如蜜紅、麝香等）</b>。切換至「放大檢視」可清楚看見彰化二林、臺中外埔等地釀酒葡萄退場的完整時間軌跡。`;
-        const plotCrops = familyViewMode === "minor"
-          ? tableCrops.filter(c => c.crop !== "巨峰葡萄")
-          : tableCrops;
-        chartFamilyMain.setOption({
+        chartCropSub.setOption({
           tooltip: { trigger: "axis" },
-          legend: { bottom: 0 },
-          grid: { top: 24, left: 60, right: 20, bottom: 48 },
-          xAxis: { type: "category", data: D.years },
-          yAxis: { type: "value", name: "公頃" },
-          series: plotCrops.map(c => ({
-            name: c.crop,
-            type: "line",
-            smooth: 0.2,
-            lineStyle: { width: 2.5 },
-            data: c.yearly.map(y => y.planted_ha)
-          }))
+          legend: { right: 10, top: 0, textStyle: { fontSize: 11 } },
+          grid: { top: 28, left: 62, right: 18, bottom: 24 },
+          xAxis: { type: "category", data: YEARS.map(String) },
+          yAxis: { type: "value", scale: true, axisLabel: { formatter: v => `${v.toFixed(2)}°${isLat ? 'N' : 'E'}` } },
+          series: [
+            {
+              name: isLat ? "面積加權緯度 (°N)" : "面積加權經度 (°E)",
+              type: "line",
+              itemStyle: { color: "#0f4c81" },
+              lineStyle: { width: 2.2 },
+              data: arr
+            },
+            {
+              name: `Theil-Sen 趨勢線 (${fmtSign(mkC.sen * 111.32 * 10, 2)} km/10yr)`,
+              type: "line",
+              symbol: "none",
+              itemStyle: { color: "#b2182b" },
+              lineStyle: { width: 1.5, type: "dashed" },
+              data: trendLine
+            }
+          ]
         }, true);
       } else {
-        noteEl.innerHTML = `<strong>芒果類統計口徑與產區說明：</strong>農業部鄉鎮農情調查（UnitId=038）將芒果區分為<b>本地種芒果（620，即土芒果／柴檨）</b>與<b>改良種芒果（621）</b>兩大代碼；其中愛文、金煌、凱特、玉文、夏雪等品種於官方統計均合併登錄於「改良種芒果」。空間判讀上：<b>臺南（玉井、楠西、南化）與屏東（枋山、枋寮）以愛文為主力</b>，<b>高雄（六龜、桃源、杉林）以金煌為主力</b>；另屏東部分鄉鎮呈現明顯「土芒果減、改良種增」的品種汰換現象。`;
-        chartFamilyMain.setOption({
+        const regs = ["北部", "中部", "南部", "東部"];
+        const rCols = ["#1f78b4", "#33a02c", "#e31a1c", "#6a3d9a"];
+        chartCropSub.setOption({
           tooltip: { trigger: "axis" },
-          legend: { bottom: 0 },
-          grid: { top: 24, left: 60, right: 20, bottom: 48 },
-          xAxis: { type: "category", data: D.years },
-          yAxis: { type: "value", name: "公頃" },
-          series: tableCrops.map((c, idx) => ({
-            name: c.crop,
+          legend: { right: 10, top: 0, textStyle: { fontSize: 11 } },
+          grid: { top: 28, left: 62, right: 18, bottom: 24 },
+          xAxis: { type: "category", data: YEARS.map(String) },
+          yAxis: { type: "value", name: mMeta.unit },
+          series: regs.map((r, i) => ({
+            name: r,
             type: "line",
-            stack: familyViewMode === "group" ? "mango_total" : undefined,
-            areaStyle: familyViewMode === "group" ? { opacity: 0.45 } : undefined,
-            smooth: 0.2,
-            lineStyle: { width: 2.8 },
-            itemStyle: { color: idx === 0 ? "#dc2626" : "#d97706" },
-            data: c.yearly.map(y => y.planted_ha)
+            stack: "reg",
+            areaStyle: { opacity: 0.5 },
+            itemStyle: { color: rCols[i] },
+            data: Array.from(spat.regSeries[r], v => Number(v.toFixed(1)))
           }))
         }, true);
       }
 
-      // 渲染右側上半：品項明細表（點擊可切換模組 3 地圖作物！）
-      const cropTbody = document.getElementById("familyCropTbody");
-      cropTbody.innerHTML = tableCrops.map(c => `
-        <tr class="clickable" data-crop="${c.crop}" title="點擊在下方模組 3 地圖查看 ${c.crop}">
-          <td><b>${c.crop}</b> <span style="color:#64748b;font-size:11px;">(${c.code})</span></td>
-          <td>${c.early_avg_ha.toLocaleString()} ha</td>
-          <td>${c.recent_avg_ha.toLocaleString()} ha</td>
-          <td style="color:${c.diff_ha >= 0 ? '#dc2626' : '#2563eb'};font-weight:600;">${fmtSign(c.diff_ha, " ha")} (${fmtSign(c.pct_change, "%")})</td>
-          <td>${fmtSign(c.net_north_km, " km")}</td>
-        </tr>
-      `).join("");
-      cropTbody.querySelectorAll("tr.clickable").forEach(tr => {
-        tr.addEventListener("click", () => {
-          currentCrop = tr.dataset.crop;
-          document.getElementById("cropSelect").value = currentCrop;
-          renderSpatial();
-          document.getElementById("chartMap").scrollIntoView({ behavior: "smooth", block: "center" });
-        });
+      // 4. Choropleth Map
+      document.getElementById("yearSliderBar").style.display = state.cropMapMode === "year" ? "flex" : "none";
+      const isDiv = state.cropMapMode === "diff" || state.cropMapMode === "pct";
+      const pal = PALETTES[state.palette];
+
+      const rawMapVals = [];
+      const mapData = townStats.rows.map(r => {
+        let rawV = 0;
+        if (state.cropMapMode === "diff") rawV = r.diff;
+        else if (state.cropMapMode === "pct") rawV = r.pct !== null ? Math.max(-200, Math.min(300, r.pct)) : 0;
+        else if (state.cropMapMode === "b_mean") rawV = r.valB;
+        else if (state.cropMapMode === "a_mean") rawV = r.valA;
+        else rawV = r.valSnap;
+
+        let plotV = rawV;
+        if (!isDiv && state.mapScale === "log") {
+          plotV = rawV > 0 ? Math.log10(rawV + 1) : 0;
+        }
+        rawMapVals.push(Math.abs(plotV));
+        return {
+          name: `${r.city}|${r.town}`,
+          value: Number(plotV.toFixed(3)),
+          rawV,
+          r
+        };
       });
 
-      // 渲染右側下半：核心產區鄉鎮排行（點擊連動模組 4）
-      const townTbody = document.getElementById("familyTownTbody");
-      townTbody.innerHTML = fam.top_towns.map(t => `
-        <tr class="clickable ${t.key === selectedTownKey ? 'selected' : ''}" data-key="${t.key}">
-          <td><b>${t.city}${t.town}</b> <span style="color:#64748b;font-size:11px;">(${t.region})</span></td>
-          <td>${t.early_ha.toLocaleString()} → <b>${t.recent_ha.toLocaleString()}</b></td>
-          <td style="color:${t.diff_ha >= 0 ? '#dc2626' : '#2563eb'};font-weight:600;">${fmtSign(t.diff_ha, " ha")}</td>
-          <td>${t.breakdown.slice(0, 3).map(b => `<span class="pill ${b.diff_ha >= 0 ? 'pill-gain' : 'pill-loss'}">${b.crop} ${b.recent_ha}ha (${fmtSign(b.diff_ha)})</span>`).join("")}</td>
-        </tr>
-      `).join("");
-      townTbody.querySelectorAll("tr.clickable").forEach(tr => {
-        tr.addEventListener("click", () => {
-          selectedTownKey = tr.dataset.key;
-          renderFamilyModule();
-          renderHotspotTable();
-          renderTownDetail();
-          document.getElementById("townDetailHeader").scrollIntoView({ behavior: "smooth", block: "center" });
-        });
-      });
-    }
-
-    // 4. 模組 3：地圖與質心北移
-    function renderSpatial() {
-      const cropObj = cropMap[currentCrop] || D.crops[0];
-      if (!cropObj) return;
-
-      const mapData = [];
-      let minVal = 0, maxVal = 100;
-      Object.entries(D.towns).forEach(([key, t]) => {
-        const ch = t.changes[cropObj.crop];
-        if (!ch) return;
-        const val = currentMapMode === "diff" ? ch.diff_ha : ch.recent_ha;
-        if (currentMapMode === "recent" && val <= 0) return;
-        mapData.push({
-          name: key,
-          value: val,
-          early: ch.early_ha,
-          recent: ch.recent_ha,
-          diff: ch.diff_ha
-        });
-      });
-
-      if (currentMapMode === "diff") {
-        const maxAbs = Math.max(15, ...mapData.map(d => Math.abs(d.value)));
-        const cap = Math.min(maxAbs, 200);
-        minVal = -cap;
-        maxVal = cap;
-      } else {
-        maxVal = Math.max(30, ...mapData.map(d => d.value));
-        minVal = 0;
+      rawMapVals.sort((a, b) => a - b);
+      let maxBound = rawMapVals.length ? rawMapVals[rawMapVals.length - 1] : 10;
+      if (state.mapScale === "p95" && rawMapVals.length >= 10) {
+        maxBound = rawMapVals[Math.floor(rawMapVals.length * 0.94)] || maxBound;
       }
+      if (maxBound <= 0) maxBound = 10;
 
-      chartMap.setOption({
+      const modeTitleMap = {
+        diff: `Δ 跨期變化 (${state.yrB1}–${state.yrB2} 減 ${state.yrA1}–${state.yrA2})`,
+        pct: `% 跨期變化率`,
+        b_mean: `期B 平均 (${state.yrB1}–${state.yrB2})`,
+        a_mean: `期A 平均 (${state.yrA1}–${state.yrA2})`,
+        year: `${state.snapYear} 年單年快照`
+      };
+      document.getElementById("cropMapTitle").textContent = `${crop.name} (${crop.code})｜${modeTitleMap[state.cropMapMode]}`;
+
+      chartCropMap.setOption({
         tooltip: {
           trigger: "item",
           formatter: p => {
-            const label = p.name.replace("|", "");
-            if (!p.data) return `${label}<br/>無 ${cropObj.crop} 種植紀錄`;
-            return `<b>${label}</b>（${cropObj.crop}）<br/>前5年均：${p.data.early} ha<br/>近5年均：${p.data.recent} ha<br/>增減：<b>${fmtSign(p.data.diff, " ha")}</b><br/><span style="color:#64748b;font-size:11px;">點擊可查看該鄉鎮所有果樹變化</span>`;
+            const lbl = p.name.replace("|", "");
+            if (!p.data) return `${lbl}<br/>無 ${crop.name} 紀錄`;
+            const r = p.data.r;
+            return `<b>${lbl}</b>（${crop.name}）<br/>
+              期A (${state.yrA1}-${String(state.yrA2).slice(2)})：<b>${fmtNum(r.valA, d)} ${mMeta.unit}</b><br/>
+              期B (${state.yrB1}-${String(state.yrB2).slice(2)})：<b>${fmtNum(r.valB, d)} ${mMeta.unit}</b><br/>
+              Δ 變化：<b>${fmtSign(r.diff, d, ' ' + mMeta.unit)}</b> (${r.pct !== null ? fmtSign(r.pct, 1, '%') : '新興'})<br/>
+              ${state.snapYear} 快照：${fmtNum(r.valSnap, d)} ${mMeta.unit}<br/>
+              <span style="color:#64748b;font-size:11px;">點擊切換至 Tab 2 查看該鄉鎮完整 56 項果品結構</span>`;
           }
         },
-        visualMap: currentMapMode === "diff" ? {
-          min: minVal, max: maxVal, left: 10, bottom: 16,
-          text: ["增加 (ha)", "減少 (ha)"],
-          inRange: { color: ["#1d4ed8", "#93c5fd", "#f8fafc", "#fca5a5", "#b91c1c"] },
-          calculable: true
-        } : {
-          min: 0, max: maxVal, left: 10, bottom: 16,
-          text: ["面積多", "面積少"],
-          inRange: { color: ["#f0fdf4", "#86efac", "#15803d", "#14532d"] },
-          calculable: true
+        visualMap: {
+          min: isDiv ? -maxBound : 0,
+          max: maxBound,
+          left: 8,
+          bottom: 10,
+          calculable: true,
+          text: isDiv ? ["增加 (+)", "減少 (−)"] : [state.mapScale === "log" ? "Log10(x+1)" : `高 (${mMeta.unit})`, "低"],
+          inRange: { color: isDiv ? pal.div : pal.seq },
+          textStyle: { fontSize: 10.5 }
         },
         series: [{
-          name: cropObj.crop,
           type: "map",
           map: "TW_TOWNS",
           roam: true,
-          zoom: 1.15,
+          zoom: 1.18,
           center: [120.95, 23.75],
-          itemStyle: { areaColor: "#f1f5f9", borderColor: "#cbd5e1", borderWidth: 0.4 },
+          itemStyle: { areaColor: "#f1f5f9", borderColor: "#cbd5e1", borderWidth: 0.35 },
           emphasis: { label: { show: false }, itemStyle: { areaColor: "#fde047" } },
           data: mapData
         }]
       }, true);
 
-      const dirText = cropObj.net_north_km >= 0 ? `向北移動 +${cropObj.net_north_km} km` : `向南移動 ${cropObj.net_north_km} km`;
-      document.getElementById("centroidStatBox").innerHTML = `
-        <strong>${cropObj.crop}</strong>（代碼 ${cropObj.code}｜${cropObj.category}）｜
-        全台面積：<b>${cropObj.early_avg_ha.toLocaleString()} → ${cropObj.recent_avg_ha.toLocaleString()} ha</b>（${fmtSign(cropObj.pct_change, "%")}）<br/>
-        面積加權質心變化（前5年 vs 近5年）：<b style="color:${cropObj.net_north_km >= 0 ? "#dc2626" : "#2563eb"}">${dirText}</b>
-        ｜線性趨勢斜率：<b>${fmtSign(cropObj.north_km_per_decade, " km/10年")}</b>（R² = ${cropObj.lat_r2}）
-      `;
-
-      chartCentroid.setOption({
-        title: { text: `${cropObj.crop}：面積加權質心緯度變化 (°N)`, left: 8, textStyle: { fontSize: 13 } },
-        tooltip: { trigger: "axis", valueFormatter: v => v ? `${v}°N` : "無資料" },
-        grid: { top: 36, left: 56, right: 20, bottom: 26 },
-        xAxis: { type: "category", data: D.years },
-        yAxis: { type: "value", scale: true, axisLabel: { formatter: v => `${v.toFixed(2)}°` } },
-        series: [{
-          name: "重心緯度",
-          type: "line",
-          smooth: 0.2,
-          itemStyle: { color: "#0f766e" },
-          lineStyle: { width: 2.5 },
-          data: cropObj.yearly.map(y => y.centroid_lat)
-        }]
-      }, true);
-
-      const regs = ["北部", "中部", "南部", "東部"];
-      const regColors = { "北部": "#0284c7", "中部": "#16a34a", "南部": "#ea580c", "東部": "#9333ea" };
-      chartRegionStack.setOption({
-        title: { text: `${cropObj.crop}：北 / 中 / 南 / 東 區域種植面積 (公頃)`, left: 8, textStyle: { fontSize: 13 } },
-        tooltip: { trigger: "axis" },
-        legend: { right: 8, top: 2, textStyle: { fontSize: 11 } },
-        grid: { top: 36, left: 56, right: 20, bottom: 26 },
-        xAxis: { type: "category", data: D.years },
-        yAxis: { type: "value" },
-        series: regs.map(r => ({
-          name: r,
-          type: "line",
-          stack: "total",
-          areaStyle: { opacity: 0.45 },
-          itemStyle: { color: regColors[r] },
-          data: cropObj.yearly.map(y => y.regions[r] || 0)
-        }))
-      }, true);
+      // 5. Township Ranking Table
+      renderCropTownTable(townStats.rows);
     }
 
-    // 5. 模組 4：熱點清單與單一鄉鎮鑽取
-    function renderHotspotTable() {
-      const regFilter = document.getElementById("regionFilter").value;
-      const kw = document.getElementById("townSearchInput").value.trim();
+    function renderCropTownTable(allRows) {
+      const mMeta = METRIC_META[state.metric];
+      const d = mMeta.digits;
+      const kw = document.getElementById("cropTownFilter").value.trim();
+      const sortBy = document.getElementById("cropTownSort").value;
 
-      let rows = D.switch_hotspots;
-      if (kw) {
-        rows = Object.entries(D.towns)
-          .filter(([k, t]) => (t.city + t.town).includes(kw) && (regFilter === "ALL" || t.region === regFilter))
-          .map(([k, t]) => {
-            const entries = Object.entries(t.changes);
-            const losses = entries.filter(([, v]) => v.diff_ha <= -3).sort((a,b) => a[1].diff_ha - b[1].diff_ha).slice(0,4).map(([c,v]) => [c, v.diff_ha]);
-            const gains = entries.filter(([, v]) => v.diff_ha >= 3).sort((a,b) => b[1].diff_ha - a[1].diff_ha).slice(0,4).map(([c,v]) => [c, v.diff_ha]);
-            const found = D.switch_hotspots.find(h => h.key === k);
-            return { key: k, city: t.city, town: t.town, region: t.region, top_losses: losses, top_gains: gains, switch_score: found ? found.switch_score : "-" };
-          })
-          .slice(0, 50);
-      } else if (regFilter !== "ALL") {
-        rows = rows.filter(r => r.region === regFilter);
-      }
+      document.getElementById("thCropA").textContent = `期A (${String(state.yrA1).slice(2)}-${String(state.yrA2).slice(2)})`;
+      document.getElementById("thCropB").textContent = `期B (${String(state.yrB1).slice(2)}-${String(state.yrB2).slice(2)})`;
 
-      const tbody = document.getElementById("hotspotTbody");
-      tbody.innerHTML = rows.map(r => `
-        <tr class="clickable ${r.key === selectedTownKey ? "selected" : ""}" data-key="${r.key}">
-          <td><b>${r.city}${r.town}</b><br/><span style="color:var(--muted);font-size:11px;">${r.region}</span></td>
-          <td>${r.top_losses.map(([c, d]) => `<span class="pill pill-loss">${c} ${d} ha</span>`).join("") || '<span style="color:#94a3b8;">無顯著減少</span>'}</td>
-          <td>${r.top_gains.map(([c, d]) => `<span class="pill pill-gain">${c} +${d} ha</span>`).join("") || '<span style="color:#94a3b8;">無顯著增加</span>'}</td>
-          <td style="font-weight:600;color:var(--primary);">${r.switch_score}</td>
+      let list = kw ? allRows.filter(r => (r.city + r.town).includes(kw)) : [...allRows];
+      list.sort((a, b) => {
+        if (sortBy === "b_desc") return b.valB - a.valB;
+        if (sortBy === "a_desc") return b.valA - a.valA;
+        if (sortBy === "diff_desc") return b.diff - a.diff;
+        return a.diff - b.diff;
+      });
+
+      const tbody = document.getElementById("cropTownTbody");
+      tbody.innerHTML = list.slice(0, 100).map(r => `
+        <tr class="row-link" data-ti="${r.ti}">
+          <td><b>${r.city}${r.town}</b> <span style="color:#64748b;font-size:11px;">(${r.reg})</span></td>
+          <td class="num">${fmtNum(r.valA, d)}</td>
+          <td class="num"><b>${fmtNum(r.valB, d)}</b></td>
+          <td class="num ${r.diff >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(r.diff, d)}</td>
+          <td class="num">${r.pct !== null ? fmtSign(r.pct, 1, '%') : '<span class="code-tag">新興</span>'}</td>
+          <td class="num">${fmtNum(r.shareB, 1)}%</td>
         </tr>
       `).join("");
 
-      tbody.querySelectorAll("tr.clickable").forEach(tr => {
+      tbody.querySelectorAll("tr.row-link").forEach(tr => {
         tr.addEventListener("click", () => {
-          selectedTownKey = tr.dataset.key;
-          renderHotspotTable();
-          renderTownDetail();
+          jumpToTownshipInRegionTab(Number(tr.dataset.ti));
         });
       });
     }
 
-    function renderTownDetail() {
-      const t = D.towns[selectedTownKey];
-      if (!t) return;
-      document.getElementById("townDetailHeader").innerHTML = `
-        <strong style="font-size:1.05rem;">${t.city} ${t.town}</strong>（${t.region}）｜
-        33 項果樹總面積：<b>${t.total_early_ha.toLocaleString()} ha</b>（2008–2012均） → <b>${t.total_recent_ha.toLocaleString()} ha</b>（2021–2025均）
-      `;
+    // =========================================================================
+    // 5. TAB 2: REGION EXPLORER 渲染邏輯 (全台 / 四大區 / 22縣市 / 368鄉鎮)
+    // =========================================================================
+    function getMatchingTownIndices() {
+      if (state.regTownTi >= 0) return [state.regTownTi];
+      const out = [];
+      A.towns.forEach((t, ti) => {
+        if (state.regRegion !== "ALL" && t[2] !== state.regRegion) return;
+        if (state.regCounty !== "ALL" && t[0] !== state.regCounty) return;
+        out.push(ti);
+      });
+      return out;
+    }
 
-      const cropNames = Object.keys(t.series).sort((a, b) => {
-        const maxA = Math.max(...t.series[a]);
-        const maxB = Math.max(...t.series[b]);
-        return maxB - maxA;
+    function isCropIncludedInCrossTotal(ci) {
+      const c = A.crops[ci];
+      if (ATOMIC_SUGAR_CODES.has(c.code)) return false; // 由 642+ 代表釋迦總計避免重複計算
+      if (c.code === "600") return false; // 排除果樹苗圃
+      if (!state.includeBetel && c.code === "622") return false;
+      return true;
+    }
+
+    function renderRegionExplorer() {
+      const tis = getMatchingTownIndices();
+      const mMeta = METRIC_META[state.metric];
+      const d = mMeta.digits;
+      const scopeName = state.regTownTi >= 0
+        ? `${A.towns[state.regTownTi][0]} ${A.towns[state.regTownTi][1]}`
+        : (state.regCounty !== "ALL" ? state.regCounty : (state.regRegion !== "ALL" ? `${state.regRegion}區域` : "全台灣 (368 鄉鎮)"));
+
+      // 計算此空間範圍內所有果品之 29 年序列
+      const cropRows = [];
+      const totP = new Float64Array(N_YRS);
+      const totH = new Float64Array(N_YRS);
+      const totPT = new Float64Array(N_YRS);
+
+      A.crops.forEach((c, ci) => {
+        if (!isCropIncludedInCrossTotal(ci)) return;
+        const cP = new Float64Array(N_YRS);
+        const cH = new Float64Array(N_YRS);
+        const cPT = new Float64Array(N_YRS);
+        let hasAny = false;
+        for (let k = 0; k < tis.length; k++) {
+          const ti = tis[k];
+          if (!townCropMap[ti].has(ci)) continue;
+          hasAny = true;
+          for (let yi = 0; yi < N_YRS; yi++) {
+            const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+            cP[yi] += p; cH[yi] += h; cPT[yi] += pt;
+            totP[yi] += p; totH[yi] += h; totPT[yi] += pt;
+          }
+        }
+        if (!hasAny) return;
+        const vals = new Array(N_YRS);
+        for (let yi = 0; yi < N_YRS; yi++) vals[yi] = computeMetricFromPHPT(cP[yi], cH[yi], cPT[yi]);
+        const vA = periodMean(vals, state.yrA1, state.yrA2);
+        const vB = periodMean(vals, state.yrB1, state.yrB2);
+        if (vA <= 0.05 && vB <= 0.05 && Math.max(...vals) <= 0.1) return;
+        const diff = vB - vA;
+        const pct = vA > 0.5 ? (diff / vA) * 100 : null;
+        const mk = mkAndSen(YEARS, vals);
+        cropRows.push({ ci, code: c.code, name: c.name, cat: c.cat, vals, vA, vB, diff, pct, sen10: mk.sen * 10, mkP: mk.p });
       });
 
-      // 預設顯示前 10 大作物圖例開啟，其餘可手動點開避免視覺擁擠
-      const legendSelected = {};
-      cropNames.forEach((name, idx) => { legendSelected[name] = idx < 10; });
+      const totVals = new Array(N_YRS);
+      for (let yi = 0; yi < N_YRS; yi++) totVals[yi] = computeMetricFromPHPT(totP[yi], totH[yi], totPT[yi]);
+      const totA = periodMean(totVals, state.yrA1, state.yrA2);
+      const totB = periodMean(totVals, state.yrB1, state.yrB2);
+      const totDiff = totB - totA;
+      const totPct = totA > 0 ? (totDiff / totA) * 100 : 0;
 
-      chartTownDrill.setOption({
-        tooltip: { trigger: "axis" },
-        legend: { type: "scroll", bottom: 0, selected: legendSelected, textStyle: { fontSize: 11 } },
-        grid: { top: 24, left: 58, right: 20, bottom: 52 },
-        xAxis: { type: "category", data: D.years },
-        yAxis: { type: "value", name: "種植面積 (公頃)" },
-        series: cropNames.map(c => ({
-          name: c,
+      // 計算區內佔比與 Shannon 多樣性指數 H' (基於種植面積或收量佔比)
+      const sumVB = cropRows.reduce((a, r) => a + Math.max(0, r.vB), 0);
+      const sumVA = cropRows.reduce((a, r) => a + Math.max(0, r.vA), 0);
+      let shannonA = 0, shannonB = 0;
+      cropRows.forEach(r => {
+        r.shareB = sumVB > 0 ? (r.vB / sumVB) * 100 : 0;
+        const pA = sumVA > 0 ? r.vA / sumVA : 0;
+        const pB = sumVB > 0 ? r.vB / sumVB : 0;
+        if (pA > 0) shannonA -= pA * Math.log(pA);
+        if (pB > 0) shannonB -= pB * Math.log(pB);
+      });
+
+      const domA = [...cropRows].sort((a, b) => b.vA - a.vA)[0];
+      const domB = [...cropRows].sort((a, b) => b.vB - a.vB)[0];
+      const topGain = [...cropRows].sort((a, b) => b.diff - a.diff)[0];
+      const topLoss = [...cropRows].sort((a, b) => a.diff - b.diff)[0];
+
+      // 1. Region Stat Strip
+      document.getElementById("regionStatStrip").innerHTML = `
+        <div class="stat-cell">
+          <div class="stat-lbl">當前選定空間範圍</div>
+          <div class="stat-val" style="font-family:var(--sans);">${scopeName}</div>
+          <div class="stat-meta">涵蓋 ${tis.length} 鄉鎮市區｜${cropRows.length} 項果品</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">果品總規模 (${state.yrA1}-${String(state.yrA2).slice(2)} → ${state.yrB1}-${String(state.yrB2).slice(2)})</div>
+          <div class="stat-val ${totDiff >= 0 ? 'val-pos' : 'val-neg'}">${fmtNum(totB, d)} ${mMeta.unit}</div>
+          <div class="stat-meta">期A ${fmtNum(totA, d)}｜Δ ${fmtSign(totDiff, d)} (${fmtSign(totPct, 1, '%')})</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">第一大主力果品演變 (期A → 期B)</div>
+          <div class="stat-val" style="font-family:var(--sans);font-size:0.98rem;">${domA ? domA.name : '—'} → ${domB ? domB.name : '—'}</div>
+          <div class="stat-meta">期B 第一大佔比：${domB ? fmtNum(domB.shareB, 1) + '%' : '—'}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">果品多樣性指數 Shannon H' (有效品項數)</div>
+          <div class="stat-val">${shannonB.toFixed(2)} (${Math.exp(shannonB).toFixed(1)} 項)</div>
+          <div class="stat-meta">期A H'=${shannonA.toFixed(2)} (${Math.exp(shannonA).toFixed(1)} 項)</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">最大擴張 ／ 最大縮減果品</div>
+          <div class="stat-val" style="font-family:var(--sans);font-size:0.94rem;">
+            <span class="val-pos">${topGain && topGain.diff > 0 ? topGain.name : '—'}</span> ／
+            <span class="val-neg">${topLoss && topLoss.diff < 0 ? topLoss.name : '—'}</span>
+          </div>
+          <div class="stat-meta">${topGain && topGain.diff > 0 ? fmtSign(topGain.diff, d) : ''} ／ ${topLoss && topLoss.diff < 0 ? fmtSign(topLoss.diff, d) : ''} ${mMeta.unit}</div>
+        </div>
+      `;
+
+      // 2. Region Composition Time-Series Chart
+      document.getElementById("regTsTitle").textContent = `${scopeName}｜果品組成演變 (1997–2025)`;
+      const top10 = [...cropRows].sort((a, b) => Math.max(b.vA, b.vB) - Math.max(a.vA, a.vB)).slice(0, 10);
+      const top10Set = new Set(top10.map(r => r.ci));
+      const othersVals = new Float64Array(N_YRS);
+      cropRows.forEach(r => {
+        if (!top10Set.has(r.ci)) {
+          for (let yi = 0; yi < N_YRS; yi++) othersVals[yi] += r.vals[yi];
+        }
+      });
+
+      const plotItems = [...top10.map(r => ({ name: r.name, vals: r.vals }))];
+      if (Math.max(...othersVals) > 0 && (state.regTsMode === "stack" || state.regTsMode === "pct")) {
+        plotItems.push({ name: "其他果品合計", vals: Array.from(othersVals) });
+      }
+
+      const rSeries = plotItems.map((item, idx) => {
+        let dataArr = item.vals.map(v => Number(v.toFixed(1)));
+        if (state.regTsMode === "pct") {
+          dataArr = item.vals.map((v, yi) => {
+            const denom = plotItems.reduce((acc, it) => acc + it.vals[yi], 0);
+            return denom > 0 ? Number(((v / denom) * 100).toFixed(1)) : 0;
+          });
+        }
+        const isStack = state.regTsMode === "stack" || state.regTsMode === "pct";
+        return {
+          name: item.name,
           type: "line",
-          smooth: 0.2,
-          lineStyle: { width: 2.2 },
-          data: t.series[c]
-        }))
+          stack: isStack ? "reg_comp" : undefined,
+          areaStyle: isStack ? { opacity: 0.65 } : undefined,
+          smooth: 0.15,
+          symbolSize: isStack ? 0 : 4,
+          lineStyle: { width: isStack ? 1.2 : 2.2 },
+          itemStyle: { color: SERIES_COLORS[idx % SERIES_COLORS.length] },
+          data: dataArr
+        };
+      });
+
+      chartRegTS.setOption({
+        tooltip: { trigger: "axis" },
+        legend: { bottom: 0, type: "scroll", textStyle: { fontSize: 11 } },
+        grid: { top: 20, left: 62, right: 18, bottom: 44 },
+        xAxis: { type: "category", data: YEARS.map(String) },
+        yAxis: {
+          type: "value",
+          max: state.regTsMode === "pct" ? 100 : undefined,
+          name: state.regTsMode === "pct" ? "結構佔比 (%)" : mMeta.unit
+        },
+        series: rSeries
+      }, true);
+
+      // 3. Region Crop Table
+      document.getElementById("regTableTitle").textContent = `${scopeName}｜全果品消長明細表（共 ${cropRows.length} 項）`;
+      const rSort = document.getElementById("regCropSort").value;
+      const sortedCrops = [...cropRows].sort((a, b) => {
+        if (rSort === "b_desc") return b.vB - a.vB;
+        if (rSort === "diff_desc") return b.diff - a.diff;
+        return a.diff - b.diff;
+      });
+      const rTbody = document.getElementById("regCropTbody");
+      rTbody.innerHTML = sortedCrops.map(r => `
+        <tr class="row-link" data-ci="${r.ci}">
+          <td><b>${r.name}</b> <span class="code-tag">${r.code}</span></td>
+          <td style="color:#64748b;font-size:11px;">${r.cat}</td>
+          <td class="num">${fmtNum(r.vA, d)}</td>
+          <td class="num"><b>${fmtNum(r.vB, d)}</b></td>
+          <td class="num ${r.diff >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(r.diff, d)}</td>
+          <td class="num">${r.pct !== null ? fmtSign(r.pct, 1, '%') : '<span class="code-tag">新興</span>'}</td>
+          <td class="num">${fmtNum(r.shareB, 1)}%</td>
+          <td class="num">${fmtSign(r.sen10, d)} ${r.mkP < 0.05 ? '*' : ''}</td>
+        </tr>
+      `).join("");
+      rTbody.querySelectorAll("tr.row-link").forEach(tr => {
+        tr.addEventListener("click", () => {
+          state.primaryCi = Number(tr.dataset.ci);
+          document.getElementById("cropPrimarySelect").value = String(state.primaryCi);
+          switchTab("crop");
+        });
+      });
+
+      // 4. Region Reference / Dominant Crop Map
+      renderRegionMap();
+    }
+
+    const DOM_FAMILY_COLORS = {
+      "柑橘(甜橙/寬皮)": "#d95f02",
+      "柑橘(酸柑/金柑)": "#66a61e",
+      "文旦柚(獨立)": "#1b9e77",
+      "其他柚類": "#a6d854",
+      "葡萄類": "#7570b3",
+      "芒果類": "#e7298a",
+      "番荔枝/釋迦類": "#008080",
+      "溫帶/需冷果樹": "#2166ac",
+      "熱帶/亞熱帶常綠": "#e6ab02",
+      "特用/其他果樹": "#8c510a"
+    };
+
+    function renderRegionMap() {
+      const yiA1 = YEARS.indexOf(state.yrA1), yiA2 = YEARS.indexOf(state.yrA2);
+      const yiB1 = YEARS.indexOf(state.yrB1), yiB2 = YEARS.indexOf(state.yrB2);
+      const nA = yiA2 - yiA1 + 1, nB = yiB2 - yiB1 + 1;
+      const mode = state.regMapMode;
+      const pal = PALETTES[state.palette];
+
+      const mapData = [];
+      let maxVal = 50;
+
+      A.towns.forEach((t, ti) => {
+        let sumA = 0, sumB = 0;
+        let bestCiA = -1, bestValA = 0;
+        let bestCiB = -1, bestValB = 0;
+
+        townCropMap[ti].forEach((_, ci) => {
+          if (!isCropIncludedInCrossTotal(ci)) return;
+          let pA = 0, hA = 0, ptA = 0, pB = 0, hB = 0, ptB = 0;
+          for (let yi = yiA1; yi <= yiA2; yi++) { const [p, h, pt] = getCellRawOrQc(ti, ci, yi); pA += p; hA += h; ptA += pt; }
+          for (let yi = yiB1; yi <= yiB2; yi++) { const [p, h, pt] = getCellRawOrQc(ti, ci, yi); pB += p; hB += h; ptB += pt; }
+          const vA = computeMetricFromPHPT(pA / nA, hA / nA, ptA / nA);
+          const vB = computeMetricFromPHPT(pB / nB, hB / nB, ptB / nB);
+          sumA += vA; sumB += vB;
+          if (vA > bestValA) { bestValA = vA; bestCiA = ci; }
+          if (vB > bestValB) { bestValB = vB; bestCiB = ci; }
+        });
+
+        const key = `${t[0]}|${t[1]}`;
+        const isSelected = state.regTownTi === ti;
+
+        if (mode === "dom_b" || mode === "dom_a") {
+          const bCi = mode === "dom_b" ? bestCiB : bestCiA;
+          const bVal = mode === "dom_b" ? bestValB : bestValA;
+          if (bCi >= 0 && bVal > 0.5) {
+            const cat = A.crops[bCi].cat;
+            mapData.push({
+              name: key,
+              value: bVal,
+              domName: A.crops[bCi].name,
+              domCat: cat,
+              sumA, sumB,
+              domAName: bestCiA >= 0 ? A.crops[bestCiA].name : "無",
+              domBName: bestCiB >= 0 ? A.crops[bestCiB].name : "無",
+              itemStyle: {
+                areaColor: DOM_FAMILY_COLORS[cat] || "#94a3b8",
+                borderColor: isSelected ? "#0f172a" : "#ffffff",
+                borderWidth: isSelected ? 2.0 : 0.4
+              }
+            });
+          }
+        } else {
+          const val = mode === "tot_b" ? sumB : (sumB - sumA);
+          if (sumA > 0 || sumB > 0) {
+            maxVal = Math.max(maxVal, Math.abs(val));
+            mapData.push({
+              name: key,
+              value: Number(val.toFixed(1)),
+              sumA, sumB,
+              domAName: bestCiA >= 0 ? A.crops[bestCiA].name : "無",
+              domBName: bestCiB >= 0 ? A.crops[bestCiB].name : "無"
+            });
+          }
+        }
+      });
+
+      const isDom = mode === "dom_b" || mode === "dom_a";
+      const isDiv = mode === "tot_diff";
+      const cap = Math.min(maxVal, 1500);
+
+      chartRegMap.setOption({
+        tooltip: {
+          trigger: "item",
+          formatter: p => {
+            const lbl = p.name.replace("|", "");
+            if (!p.data) return `${lbl}<br/>無果品紀錄`;
+            const dObj = p.data;
+            return `<b>${lbl}</b><br/>
+              期A 第一大：<b>${dObj.domAName}</b>｜總計 ${fmtNum(dObj.sumA, 1)}<br/>
+              期B 第一大：<b>${dObj.domBName}</b>｜總計 ${fmtNum(dObj.sumB, 1)}<br/>
+              總量增減：<b>${fmtSign(dObj.sumB - dObj.sumA, 1)}</b><br/>
+              <span style="color:#64748b;font-size:11px;">點擊鎖定此鄉鎮進行結構鑽取</span>`;
+          }
+        },
+        visualMap: isDom ? { show: false } : {
+          min: isDiv ? -cap : 0,
+          max: cap,
+          left: 8,
+          bottom: 10,
+          calculable: true,
+          inRange: { color: isDiv ? pal.div : pal.seq }
+        },
+        series: [{
+          type: "map",
+          map: "TW_TOWNS",
+          roam: true,
+          zoom: 1.18,
+          center: [120.95, 23.75],
+          itemStyle: { areaColor: "#f1f5f9", borderColor: "#cbd5e1", borderWidth: 0.35 },
+          emphasis: { label: { show: false }, itemStyle: { areaColor: "#fde047" } },
+          data: mapData
+        }]
       }, true);
     }
 
-    // 初始化作物分組下拉選單
-    const cropSel = document.getElementById("cropSelect");
-    const catOrder = [
-      "文旦柚",
-      "柑橘(甜橙/寬皮)",
-      "柑橘(酸柑/金柑)",
-      "其他柚類",
-      "葡萄類",
-      "芒果類",
-      "溫帶/需冷",
-      "耐熱/熱帶",
-      "傳統大宗"
-    ];
-    catOrder.forEach(cat => {
-      const items = D.crops.filter(c => c.category === cat);
-      if (!items.length) return;
-      const grp = document.createElement("optgroup");
-      grp.label = `── ${cat} (${items.length}) ──`;
-      items.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c.crop;
-        opt.textContent = `${c.crop} [代碼 ${c.code}] (${c.recent_avg_ha} ha)`;
-        if (c.crop === currentCrop) opt.selected = true;
-        grp.appendChild(opt);
-      });
-      cropSel.appendChild(grp);
-    });
-
-    cropSel.addEventListener("change", e => { currentCrop = e.target.value; renderSpatial(); });
-    document.getElementById("mapModeSelect").addEventListener("change", e => { currentMapMode = e.target.value; renderSpatial(); });
-    document.getElementById("barMetricSelect").addEventListener("change", e => { currentBarMetric = e.target.value; renderMacro(); });
-    document.getElementById("regionFilter").addEventListener("change", renderHotspotTable);
-    document.getElementById("townSearchInput").addEventListener("input", renderHotspotTable);
-
-    document.querySelectorAll("#catFilterBtns button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll("#catFilterBtns button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentCategory = btn.dataset.cat;
-        renderMacro();
-      });
-    });
-
-    document.querySelectorAll("#familyTabs button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll("#familyTabs button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentFamily = btn.dataset.fam;
-        familyViewMode = "detail";
-        renderFamilyModule();
-      });
-    });
-
-    chartMap.on("click", params => {
-      if (params.name && D.towns[params.name]) {
-        selectedTownKey = params.name;
-        renderHotspotTable();
-        renderTownDetail();
-        document.getElementById("townDetailHeader").scrollIntoView({ behavior: "smooth", block: "center" });
+    // =========================================================================
+    // 6. TAB 3: SYNTHESIS, QUADRANT SCATTER, HOTSPOTS & QC AUDIT
+    // =========================================================================
+    const SYN_FAMILIES = {
+      citrus: {
+        codes: ["604", "603", "605", "615", "614", "610", "606", "618", "611", "617", "616", "613"],
+        note: "<b>柑橘類細項（已嚴格排除 607 文旦柚與其他柚類，共 12 項）：</b>傳統甜橙／寬皮柑（柳橙、椪柑、桶柑、海梨柑）自 2000 年代中後期持續縮減；晚熟高單價柑橘（茂谷柑 1997 年 114 ha → 2025 年 1,852 ha，其他柑桔擴張逾 3 倍）向中北部推進；南部酸柑（檸檬、萊姆）同步增長。"
+      },
+      wendan: {
+        codes: ["607", "609", "612", "608"],
+        note: "<b>文旦柚獨立追蹤（代碼 607，另列白柚 609 / 葡萄柚 612 / 斗柚 608 虛線對照）：</b>文旦柚 29 年全台總面積由 6,974 ha 調整至 3,798 ha，但核心品牌產區（臺南麻豆、花蓮瑞穗、新北八里、雲林斗六）逆勢擴張或穩守，CR5 集中度顯著上升，外圍非核心鄉鎮則大量退場。"
+      },
+      grape: {
+        codes: ["629", "631", "632", "630", "633"],
+        note: "<b>葡萄全品項（鮮食 3 項 + 釀酒 2 項）：</b>完整重現公賣局契作結束與入世後，彰化二林、臺中外埔等地釀酒葡萄（黑后 632、金香 631）歷史性退場並轉作紅龍果的過程；鮮食主力巨峰葡萄（629）則高度集中於溪湖、大村、新社、卓蘭與信義。"
+      },
+      mango: {
+        codes: ["621", "620"],
+        note: "<b>芒果專區（改良種 621 vs 本地種土芒果 620）：</b>29 年間本地種土芒果由 8,215 ha 縮減至 2,212 ha（-73%），改良種芒果（官方合併登錄愛文、金煌、玉文、凱特、夏雪等）則穩健擴張至近 1.4 萬公頃。臺南／屏東以愛文為主，高雄六龜／桃源以金煌為主。"
+      },
+      sugar: {
+        codes: ["642+", "642", "652", "653"],
+        note: "<b>番荔枝／釋迦跨年代碼整合：</b>農業部於 2017 年（民國 106 年）將原「642 番荔枝」分拆為「652 大目種」與「653 鳳梨釋迦」。本平台自動合成「642+ 番荔枝(釋迦合計)」以維持 1997–2025 連續 29 年時間序列，同時保留分拆後兩大品種對照。"
+      },
+      macro_compare: {
+        codes: ["601", "602", "623", "627", "651", "648", "639", "626", "635", "624", "628"],
+        note: "<b>大宗溫帶需冷 vs. 熱帶常綠代表果品對照：</b>熱帶常綠品項（香蕉、番石榴、紅龍果、酪梨）呈現長期擴張，木瓜維持集約網室規模；溫帶需冷落葉果樹（梅、李、梨）與高勞力蓮霧則呈現長期結構性縮減，甜柿（626）則在 1997–2015 擴張見頂後反轉。"
       }
-    });
+    };
 
-    window.addEventListener("resize", () => {
-      [chartMacroLines, chartMacroBar, chartFamilyMain, chartMap, chartCentroid, chartRegionStack, chartTownDrill].forEach(c => c.resize());
-    });
+    function renderSynthesisTab() {
+      const mMeta = METRIC_META[state.metric];
+      const d = mMeta.digits;
 
-    renderKPIs();
-    renderMacro();
-    renderFamilyModule();
-    renderSpatial();
-    renderHotspotTable();
-    renderTownDetail();
+      // 1. Focal Family Chart & Table
+      const fSpec = SYN_FAMILIES[state.synFamily];
+      document.getElementById("synFamilySummary").innerHTML = fSpec.note;
+      const fCis = fSpec.codes.map(c => codeToCi[c]).filter(x => x !== undefined);
+
+      const fRows = fCis.map((ci, idx) => {
+        const c = A.crops[ci];
+        const nat = getCropNationalSeries(ci);
+        const spat = getCropSpatialTrajectory(ci);
+        const vA = periodMean(nat.values, state.yrA1, state.yrA2);
+        const vB = periodMean(nat.values, state.yrB1, state.yrB2);
+        const diff = vB - vA;
+        const pct = vA > 0 ? (diff / vA) * 100 : 0;
+        const latA = periodMean(spat.lats, state.yrA1, state.yrA2);
+        const latB = periodMean(spat.lats, state.yrB1, state.yrB2);
+        const netKm = (latA && latB) ? (latB - latA) * 111.32 : 0;
+        const mkLat = mkAndSen(YEARS, spat.lats);
+        return { ci, c, vals: nat.values, vA, vB, diff, pct, netKm, senKm10: mkLat.sen * 111.32 * 10, mkP: mkLat.p, idx };
+      });
+
+      chartSynFamily.setOption({
+        tooltip: { trigger: "axis" },
+        legend: { bottom: 0, type: "scroll", textStyle: { fontSize: 11 } },
+        grid: { top: 20, left: 62, right: 18, bottom: 44 },
+        xAxis: { type: "category", data: YEARS.map(String) },
+        yAxis: { type: "value", name: mMeta.unit },
+        series: fRows.map(r => ({
+          name: r.c.name,
+          type: "line",
+          smooth: 0.15,
+          lineStyle: {
+            width: (state.synFamily === "wendan" && r.c.code !== "607") ? 1.5 : 2.3,
+            type: (state.synFamily === "wendan" && r.c.code !== "607") ? "dashed" : "solid"
+          },
+          itemStyle: { color: SERIES_COLORS[r.idx % SERIES_COLORS.length] },
+          data: r.vals
+        }))
+      }, true);
+
+      const fTbody = document.getElementById("synFamilyTbody");
+      fTbody.innerHTML = fRows.map(r => `
+        <tr class="row-link" data-ci="${r.ci}">
+          <td><b>${r.c.name}</b> <span class="code-tag">${r.c.code}</span></td>
+          <td class="num">${fmtNum(r.vA, d)}</td>
+          <td class="num"><b>${fmtNum(r.vB, d)}</b></td>
+          <td class="num ${r.diff >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(r.diff, d)} (${fmtSign(r.pct, 1, '%')})</td>
+          <td class="num">${fmtSign(r.netKm, 2)}</td>
+          <td class="num ${r.senKm10 >= 0 ? 'val-pos' : 'val-neg'}">${fmtSign(r.senKm10, 2)}</td>
+          <td class="num">${fmtP(r.mkP)}</td>
+        </tr>
+      `).join("");
+      fTbody.querySelectorAll("tr.row-link").forEach(tr => {
+        tr.addEventListener("click", () => {
+          state.primaryCi = Number(tr.dataset.ci);
+          document.getElementById("cropPrimarySelect").value = String(state.primaryCi);
+          switchTab("crop");
+        });
+      });
+
+      // 2. Quadrant Bubble Scatter (Area % Change vs Sen's Slope km/10yr)
+      const scatterPts = [];
+      A.crops.forEach((c, ci) => {
+        if (ATOMIC_SUGAR_CODES.has(c.code) || c.code === "600") return;
+        const nat = getCropNationalSeries(ci, "planted");
+        const vA = periodMean(nat.values, state.yrA1, state.yrA2);
+        const vB = periodMean(nat.values, state.yrB1, state.yrB2);
+        if (Math.max(vA, vB) < 100) return; // 主力果品 >= 100 ha
+        const pct = vA > 1 ? Math.max(-100, Math.min(250, ((vB - vA) / vA) * 100)) : 250;
+        const spat = getCropSpatialTrajectory(ci);
+        const mkLat = mkAndSen(YEARS, spat.lats);
+        const senKm10 = Number((mkLat.sen * 111.32 * 10).toFixed(2));
+        scatterPts.push({
+          ci,
+          name: c.name,
+          cat: c.cat,
+          value: [Number(pct.toFixed(1)), senKm10, Math.round(vB), mkLat.p],
+          sig: mkLat.p < 0.05
+        });
+      });
+
+      chartSynScatter.setOption({
+        tooltip: {
+          formatter: p => {
+            const dObj = p.data;
+            return `<b>${dObj.name}</b> (${dObj.cat})<br/>
+              面積變化率：<b>${fmtSign(dObj.value[0], 1, '%')}</b> (截尾上限 250%)<br/>
+              緯度 Sen's Slope：<b>${fmtSign(dObj.value[1], 2, ' km/10yr')}</b><br/>
+              期B 平均面積：${dObj.value[2].toLocaleString()} ha<br/>
+              MK 檢定 p-value：<b>${fmtP(dObj.value[3])}</b>`;
+          }
+        },
+        grid: { top: 24, left: 58, right: 26, bottom: 42 },
+        xAxis: { type: "value", name: "跨期面積變化率 (%)", nameLocation: "middle", nameGap: 26, splitLine: { lineStyle: { type: "dashed" } } },
+        yAxis: { type: "value", name: "緯度質心斜率 (km / 10yr)", splitLine: { lineStyle: { type: "dashed" } } },
+        series: [{
+          type: "scatter",
+          symbolSize: val => Math.max(10, Math.min(44, Math.sqrt(val[2]) * 0.36)),
+          label: { show: true, formatter: p => p.data.name, position: "top", fontSize: 10.5, color: "#1e293b" },
+          data: scatterPts.map(pt => ({
+            ...pt,
+            itemStyle: {
+              color: DOM_FAMILY_COLORS[pt.cat] || "#0f4c81",
+              opacity: 0.78,
+              borderColor: pt.sig ? "#0f172a" : "transparent",
+              borderWidth: pt.sig ? 2 : 0
+            }
+          })),
+          markLine: {
+            silent: true,
+            symbol: "none",
+            lineStyle: { color: "#64748b", width: 1 },
+            data: [{ xAxis: 0 }, { yAxis: 0 }]
+          }
+        }]
+      }, true);
+
+      // 3. Dynamic A->B Hotspot Table
+      renderDynamicHotspots();
+    }
+
+    function renderDynamicHotspots() {
+      const yiA1 = YEARS.indexOf(state.yrA1), yiA2 = YEARS.indexOf(state.yrA2);
+      const yiB1 = YEARS.indexOf(state.yrB1), yiB2 = YEARS.indexOf(state.yrB2);
+      const nA = yiA2 - yiA1 + 1, nB = yiB2 - yiB1 + 1;
+      const kw = document.getElementById("synHotspotSearch").value.trim();
+
+      const hotspots = [];
+      A.towns.forEach((t, ti) => {
+        if (kw && !(t[0] + t[1]).includes(kw)) return;
+        const losses = [];
+        const gains = [];
+        let retreatLoss = 0, expandGain = 0, anyLoss = 0, anyGain = 0;
+
+        townCropMap[ti].forEach((_, ci) => {
+          const c = A.crops[ci];
+          if (ATOMIC_SUGAR_CODES.has(c.code) || c.code === "600") return;
+          if (!state.hotspotBetel && c.code === "622") return;
+
+          let pA = 0, pB = 0;
+          for (let yi = yiA1; yi <= yiA2; yi++) pA += getCellRawOrQc(ti, ci, yi)[0];
+          for (let yi = yiB1; yi <= yiB2; yi++) pB += getCellRawOrQc(ti, ci, yi)[0];
+          const diff = (pB / nB) - (pA / nA);
+
+          if (diff <= -5) {
+            losses.push([c.name, diff]);
+            anyLoss += -diff;
+            if (c.role === "retreat" || c.role === "betel") retreatLoss += -diff;
+          } else if (diff >= 5) {
+            gains.push([c.name, diff]);
+            anyGain += diff;
+            if (c.role === "expand") expandGain += diff;
+          }
+        });
+
+        const score = Math.min(retreatLoss, expandGain) * 2 + Math.min(anyLoss, anyGain) * 0.5;
+        if (score >= 15 || (kw && (losses.length || gains.length))) {
+          losses.sort((a, b) => a[1] - b[1]);
+          gains.sort((a, b) => b[1] - a[1]);
+          hotspots.push({ ti, city: t[0], town: t[1], reg: t[2], losses: losses.slice(0, 4), gains: gains.slice(0, 4), score: Number(score.toFixed(1)) });
+        }
+      });
+
+      hotspots.sort((a, b) => b.score - a.score);
+      const tbody = document.getElementById("synHotspotTbody");
+      tbody.innerHTML = hotspots.slice(0, 50).map(h => `
+        <tr class="row-link" data-ti="${h.ti}">
+          <td><b>${h.city}${h.town}</b> <span style="color:#64748b;font-size:11px;">(${h.reg})</span></td>
+          <td>${h.losses.map(([n, v]) => `<span class="delta-chip chip-neg">${n} ${fmtSign(v, 1)}</span>`).join("") || "—"}</td>
+          <td>${h.gains.map(([n, v]) => `<span class="delta-chip chip-pos">${n} ${fmtSign(v, 1)}</span>`).join("") || "—"}</td>
+          <td class="num"><b>${h.score}</b></td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll("tr.row-link").forEach(tr => {
+        tr.addEventListener("click", () => {
+          jumpToTownshipInRegionTab(Number(tr.dataset.ti));
+        });
+      });
+    }
+
+    function renderQcAuditTable() {
+      const tbody = document.getElementById("qcAuditTbody");
+      tbody.innerHTML = A.qc_flags.map(fl => {
+        const [yr, ti, ci, ftype, rp, qp, , , , , note] = fl;
+        const t = A.towns[ti];
+        const c = A.crops[ci];
+        return `
+          <tr class="row-link" data-ti="${ti}" data-ci="${ci}">
+            <td class="num">${yr}</td>
+            <td><b>${t[0]}${t[1]}</b></td>
+            <td>${c.name} <span class="code-tag">${c.code}</span></td>
+            <td><span class="code-tag">${ftype}</span></td>
+            <td class="num val-pos">${fmtNum(rp, 2)}</td>
+            <td class="num val-neg"><b>${fmtNum(qp, 2)}</b></td>
+            <td style="color:#475569;">${note}</td>
+          </tr>
+        `;
+      }).join("");
+      tbody.querySelectorAll("tr.row-link").forEach(tr => {
+        tr.addEventListener("click", () => {
+          state.primaryCi = Number(tr.dataset.ci);
+          document.getElementById("cropPrimarySelect").value = String(state.primaryCi);
+          switchTab("crop");
+        });
+      });
+    }
+
+    // =========================================================================
+    // 7. 導覽切換、控制項初始化與 CSV 匯出
+    // =========================================================================
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      document.querySelectorAll("#mainNavTabs .nav-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tabId));
+      document.querySelectorAll(".tab-pane").forEach(p => p.classList.toggle("active", p.id === `pane-${tabId}`));
+      renderActiveTab();
+      setTimeout(() => {
+        [chartCropTS, chartCropSub, chartCropMap, chartRegMap, chartRegTS, chartSynFamily, chartSynScatter].forEach(c => c.resize());
+      }, 30);
+    }
+
+    function jumpToTownshipInRegionTab(ti) {
+      const [city, , reg] = A.towns[ti];
+      state.regRegion = "ALL";
+      state.regCounty = city;
+      state.regTownTi = ti;
+      document.getElementById("regRegionSelect").value = "ALL";
+      populateCountySelect();
+      document.getElementById("regCountySelect").value = city;
+      populateTownSelect();
+      document.getElementById("regTownSelect").value = String(ti);
+      switchTab("region");
+    }
+
+    function renderActiveTab() {
+      if (state.activeTab === "crop") renderCropExplorer();
+      else if (state.activeTab === "region") renderRegionExplorer();
+      else renderSynthesisTab();
+    }
+
+    function initControls() {
+      // 年份選單
+      ["yrA1", "yrA2", "yrB1", "yrB2"].forEach(id => {
+        const sel = document.getElementById(id);
+        YEARS.forEach(y => {
+          const opt = document.createElement("option");
+          opt.value = y;
+          opt.textContent = `${y} (民${y - 1911})`;
+          sel.appendChild(opt);
+        });
+        sel.value = state[id];
+        sel.addEventListener("change", () => {
+          let v = Number(sel.value);
+          state[id] = v;
+          if (state.yrA1 > state.yrA2) { state.yrA2 = state.yrA1; document.getElementById("yrA2").value = state.yrA2; }
+          if (state.yrB1 > state.yrB2) { state.yrB2 = state.yrB1; document.getElementById("yrB2").value = state.yrB2; }
+          document.querySelectorAll("#windowPresets .seg-btn").forEach(b => b.classList.remove("active"));
+          renderActiveTab();
+        });
+      });
+
+      document.querySelectorAll("#windowPresets .seg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#windowPresets .seg-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.yrA1 = Number(btn.dataset.a1);
+          state.yrA2 = Number(btn.dataset.a2);
+          state.yrB1 = Number(btn.dataset.b1);
+          state.yrB2 = Number(btn.dataset.b2);
+          document.getElementById("yrA1").value = state.yrA1;
+          document.getElementById("yrA2").value = state.yrA2;
+          document.getElementById("yrB1").value = state.yrB1;
+          document.getElementById("yrB2").value = state.yrB2;
+          renderActiveTab();
+        });
+      });
+
+      // 果品選單 (分組 optgroup)
+      const groups = {};
+      A.crops.forEach((c, ci) => {
+        if (!groups[c.cat]) groups[c.cat] = [];
+        groups[c.cat].push({ c, ci });
+      });
+
+      const priSel = document.getElementById("cropPrimarySelect");
+      const cmpSel = document.getElementById("cropCompareAddSelect");
+      Object.entries(groups).forEach(([cat, items]) => {
+        const g1 = document.createElement("optgroup");
+        const g2 = document.createElement("optgroup");
+        g1.label = `── ${cat} (${items.length}) ──`;
+        g2.label = `── ${cat} (${items.length}) ──`;
+        items.forEach(({ c, ci }) => {
+          const o1 = document.createElement("option");
+          o1.value = ci;
+          o1.textContent = `${c.name} [${c.code}]`;
+          if (ci === state.primaryCi) o1.selected = true;
+          g1.appendChild(o1);
+
+          const o2 = document.createElement("option");
+          o2.value = ci;
+          o2.textContent = `${c.name} [${c.code}]`;
+          g2.appendChild(o2);
+        });
+        priSel.appendChild(g1);
+        cmpSel.appendChild(g2);
+      });
+
+      priSel.addEventListener("change", e => { state.primaryCi = Number(e.target.value); renderCropExplorer(); });
+      cmpSel.addEventListener("change", e => {
+        const addCi = Number(e.target.value);
+        e.target.value = "";
+        if (!isNaN(addCi) && addCi !== state.primaryCi && !state.compareCis.includes(addCi) && state.compareCis.length < 5) {
+          state.compareCis.push(addCi);
+          renderCropExplorer();
+        }
+      });
+
+      // Top Nav
+      document.querySelectorAll("#mainNavTabs .nav-tab").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+      });
+
+      // Global Controls
+      document.getElementById("metricSelect").addEventListener("change", e => { state.metric = e.target.value; renderActiveTab(); });
+      document.getElementById("paletteSelect").addEventListener("change", e => { state.palette = e.target.value; renderActiveTab(); });
+      document.querySelectorAll("#qcModeBtns .seg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#qcModeBtns .seg-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.qcMode = btn.dataset.qc;
+          renderActiveTab();
+        });
+      });
+
+      // Tab 1 Controls
+      document.querySelectorAll("#tsNormBtns .seg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#tsNormBtns .seg-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.tsNorm = btn.dataset.norm;
+          renderCropExplorer();
+        });
+      });
+      document.querySelectorAll("#cropSubChartBtns .seg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#cropSubChartBtns .seg-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.cropSubMode = btn.dataset.sub;
+          renderCropExplorer();
+        });
+      });
+      document.getElementById("cropMapMode").addEventListener("change", e => { state.cropMapMode = e.target.value; renderCropExplorer(); });
+      document.querySelectorAll("#mapScaleBtns .seg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#mapScaleBtns .seg-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.mapScale = btn.dataset.scale;
+          renderCropExplorer();
+        });
+      });
+      document.getElementById("cropTownFilter").addEventListener("input", () => renderCropTownTable(getTownCropPeriodStats(state.primaryCi).rows));
+      document.getElementById("cropTownSort").addEventListener("change", () => renderCropTownTable(getTownCropPeriodStats(state.primaryCi).rows));
+
+      // Year Slider & Play
+      const slider = document.getElementById("mapYearSlider");
+      const sliderLbl = document.getElementById("mapYearLabel");
+      slider.addEventListener("input", e => {
+        state.snapYear = Number(e.target.value);
+        sliderLbl.textContent = `${state.snapYear} (民${state.snapYear - 1911})`;
+        renderCropExplorer();
+      });
+      document.getElementById("btnPlayYear").addEventListener("click", e => {
+        const btn = e.target;
+        if (state.playTimer) {
+          clearInterval(state.playTimer);
+          state.playTimer = null;
+          btn.textContent = "▶ Play";
+          return;
+        }
+        if (state.snapYear >= 2025) state.snapYear = 1997;
+        btn.textContent = "⏸ Pause";
+        state.playTimer = setInterval(() => {
+          state.snapYear++;
+          if (state.snapYear > 2025) {
+            clearInterval(state.playTimer);
+            state.playTimer = null;
+            btn.textContent = "▶ Play";
+            return;
+          }
+          slider.value = state.snapYear;
+          sliderLbl.textContent = `${state.snapYear} (民${state.snapYear - 1911})`;
+          renderCropExplorer();
+        }, 420);
+      });
+
+      chartCropMap.on("click", p => {
+        if (p.name && townKeyToTi[p.name] !== undefined) {
+          jumpToTownshipInRegionTab(townKeyToTi[p.name]);
+        }
+      });
+
+      // Tab 2 Controls
+      populateCountySelect();
+      populateTownSelect();
+      document.getElementById("regRegionSelect").addEventListener("change", e => {
+        state.regRegion = e.target.value;
+        state.regCounty = "ALL";
+        state.regTownTi = -1;
+        populateCountySelect();
+        populateTownSelect();
+        renderRegionExplorer();
+      });
+      document.getElementById("regCountySelect").addEventListener("change", e => {
+        state.regCounty = e.target.value;
+        state.regTownTi = -1;
+        populateTownSelect();
+        renderRegionExplorer();
+      });
+      document.getElementById("regTownSelect").addEventListener("change", e => {
+        state.regTownTi = e.target.value === "ALL" ? -1 : Number(e.target.value);
+        renderRegionExplorer();
+      });
+      document.getElementById("regQuickSearch").addEventListener("change", e => {
+        const kw = e.target.value.trim();
+        if (!kw) return;
+        const foundTi = A.towns.findIndex(t => (t[0] + t[1]).includes(kw));
+        if (foundTi >= 0) {
+          e.target.value = "";
+          jumpToTownshipInRegionTab(foundTi);
+        }
+      });
+      document.getElementById("chkIncludeBetel").addEventListener("change", e => { state.includeBetel = e.target.checked; renderRegionExplorer(); });
+      document.getElementById("regMapMode").addEventListener("change", e => { state.regMapMode = e.target.value; renderRegionMap(); });
+      document.getElementById("regCropSort").addEventListener("change", renderRegionExplorer);
+      document.querySelectorAll("#regTsModeBtns .seg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#regTsModeBtns .seg-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.regTsMode = btn.dataset.rmode;
+          renderRegionExplorer();
+        });
+      });
+      chartRegMap.on("click", p => {
+        if (p.name && townKeyToTi[p.name] !== undefined) {
+          jumpToTownshipInRegionTab(townKeyToTi[p.name]);
+        }
+      });
+
+      // Tab 3 Controls
+      document.querySelectorAll("#synFamilyBtns .btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#synFamilyBtns .btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.synFamily = btn.dataset.fam;
+          renderSynthesisTab();
+        });
+      });
+      document.getElementById("chkHotspotBetel").addEventListener("change", e => { state.hotspotBetel = e.target.checked; renderDynamicHotspots(); });
+      document.getElementById("synHotspotSearch").addEventListener("input", renderDynamicHotspots);
+      chartSynScatter.on("click", p => {
+        if (p.data && p.data.ci !== undefined) {
+          state.primaryCi = p.data.ci;
+          document.getElementById("cropPrimarySelect").value = String(state.primaryCi);
+          switchTab("crop");
+        }
+      });
+
+      // Export CSV
+      document.getElementById("btnExportCsv").addEventListener("click", exportCurrentViewCsv);
+
+      window.addEventListener("resize", () => {
+        [chartCropTS, chartCropSub, chartCropMap, chartRegMap, chartRegTS, chartSynFamily, chartSynScatter].forEach(c => c.resize());
+      });
+    }
+
+    function populateCountySelect() {
+      const sel = document.getElementById("regCountySelect");
+      const validCounties = new Set();
+      A.towns.forEach(t => { if (state.regRegion === "ALL" || t[2] === state.regRegion) validCounties.add(t[0]); });
+      sel.innerHTML = `<option value="ALL">全部縣市 (${validCounties.size})</option>` +
+        A.counties.filter(c => validCounties.has(c)).map(c => `<option value="${c}">${c}</option>`).join("");
+    }
+
+    function populateTownSelect() {
+      const sel = document.getElementById("regTownSelect");
+      const items = [];
+      A.towns.forEach((t, ti) => {
+        if (state.regRegion !== "ALL" && t[2] !== state.regRegion) return;
+        if (state.regCounty !== "ALL" && t[0] !== state.regCounty) return;
+        items.push({ ti, label: `${t[0]}${t[1]}` });
+      });
+      sel.innerHTML = `<option value="ALL">全區彙整 (${items.length} 鄉鎮)</option>` +
+        items.map(it => `<option value="${it.ti}">${it.label}</option>`).join("");
+    }
+
+    function exportCurrentViewCsv() {
+      const lines = [];
+      let filename = `tw_fruit_atlas_${state.qcMode}.csv`;
+
+      if (state.activeTab === "crop") {
+        const ci = state.primaryCi;
+        const c = A.crops[ci];
+        filename = `crop_${c.code}_${c.name}_1997_2025_${state.qcMode}.csv`;
+        lines.push(["crop_code", "crop_name", "city", "town", "region", "metric", ...YEARS].join(","));
+        cropTownMap[ci].forEach((_, ti) => {
+          const t = A.towns[ti];
+          const vals = YEARS.map((_, yi) => {
+            const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+            return computeMetricFromPHPT(p, h, pt).toFixed(2);
+          });
+          lines.push([c.code, c.name, t[0], t[1], t[2], state.metric, ...vals].join(","));
+        });
+      } else {
+        const tis = getMatchingTownIndices();
+        const scope = state.regTownTi >= 0 ? `${A.towns[state.regTownTi][0]}${A.towns[state.regTownTi][1]}` : (state.regCounty !== "ALL" ? state.regCounty : state.regRegion);
+        filename = `region_${scope}_1997_2025_${state.qcMode}.csv`;
+        lines.push(["scope", "crop_code", "crop_name", "category", "metric", ...YEARS].join(","));
+        A.crops.forEach((c, ci) => {
+          if (!isCropIncludedInCrossTotal(ci)) return;
+          const vals = YEARS.map((_, yi) => {
+            let pS = 0, hS = 0, ptS = 0;
+            tis.forEach(ti => {
+              if (townCropMap[ti].has(ci)) {
+                const [p, h, pt] = getCellRawOrQc(ti, ci, yi);
+                pS += p; hS += h; ptS += pt;
+              }
+            });
+            return computeMetricFromPHPT(pS, hS, ptS).toFixed(2);
+          });
+          if (vals.some(v => Number(v) > 0)) {
+            lines.push([scope, c.code, c.name, c.cat, state.metric, ...vals].join(","));
+          }
+        });
+      }
+
+      const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+
+    // 啟動平台
+    initControls();
+    renderQcAuditTable();
+    renderCropExplorer();
   </script>
 </body>
 </html>
