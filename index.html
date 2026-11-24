@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>台灣長期果樹產區變遷分析（2008–2025）｜v2.0 深度探索儀表板</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="data/dashboard_data.js"></script>
+  <script src="data/taiwan_topo.js"></script>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #0f766e;
+      --primary-light: #ccfbf1;
+      --gain: #dc2626;
+      --loss: #2563eb;
+      --accent: #d97706;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%);
+      color: #fff;
+      padding: 24px 32px;
+      border-bottom: 4px solid #14b8a6;
+    }
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    header p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .badge {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+    }
+    .badge-ver {
+      background: rgba(20,184,166,0.28);
+      border-color: #2dd4bf;
+      color: #f0fdfa;
+      font-weight: 600;
+    }
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+      gap: 14px;
+    }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px 17px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+    }
+    .kpi-label { font-size: 0.81rem; color: var(--muted); margin-bottom: 4px; }
+    .kpi-value { font-size: 1.35rem; font-weight: 700; color: var(--text); }
+    .kpi-sub { font-size: 0.79rem; color: var(--muted); margin-top: 4px; }
+    .kpi-gain { color: var(--gain); }
+    .kpi-loss { color: var(--loss); }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: 0 1px 4px rgba(15,23,42,0.04);
+    }
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-tag {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    select, input, button {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+    button.tab-btn {
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button.tab-btn:hover {
+      border-color: var(--primary);
+    }
+    button.tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .family-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .family-tab {
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 8px 15px;
+      border-radius: 9px;
+      cursor: pointer;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      transition: all 0.15s;
+    }
+    .family-tab.active {
+      background: #0f766e;
+      color: #fff;
+      border-color: #0f766e;
+      box-shadow: 0 2px 6px rgba(15,118,110,0.22);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.12fr 1fr;
+      gap: 18px;
+    }
+    .grid-map {
+      display: grid;
+      grid-template-columns: 1fr 1.12fr;
+      gap: 18px;
+    }
+    @media (max-width: 980px) {
+      .grid-2, .grid-map { grid-template-columns: 1fr; }
+    }
+    .chart-box { width: 100%; height: 410px; }
+    .map-box { width: 100%; height: 540px; }
+    .sub-chart-box { width: 100%; height: 255px; }
+
+    .table-wrap {
+      max-height: 460px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .table-wrap-sm {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #f1f5f9;
+      text-align: left;
+      padding: 9px 10px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      z-index: 1;
+    }
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    tr.clickable { cursor: pointer; transition: background 0.12s; }
+    tr.clickable:hover { background: #f8fafc; }
+    tr.clickable.selected { background: #ecfdf5; }
+    .pill {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.76rem;
+      margin: 1px 2px 1px 0;
+      font-weight: 500;
+    }
+    .pill-loss { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .pill-gain { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .pill-neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    .town-summary-bar {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 12px;
+      font-size: 0.87rem;
+    }
+    .note-box {
+      background: #fffbeb;
+      border-left: 4px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      color: #78350f;
+      margin-top: 10px;
+    }
+    .info-box {
+      background: #f0fdfa;
+      border-left: 4px solid #0d9488;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      color: #134e4a;
+      margin-top: 10px;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 12px 24px 32px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>台灣長期果樹產區變遷分析（2008–2025）</h1>
+    <p>全台灣 368 鄉鎮 33 項果樹農情消長：柑橘細項拆解、文旦柚獨立追蹤、葡萄與芒果品種結構及 A→B 轉作熱點</p>
+    <div class="badge-row">
+      <span class="badge badge-ver" id="verBadge">v2.0</span>
+      <span class="badge">資料來源：農業部開放資料平臺 UnitId=038（33 項果樹代碼）</span>
+      <span class="badge">時間跨度：民國 97–114 年（2008–2025，共 18 年）</span>
+      <span class="badge">重點族群：柑橘 12 細項 ／ 文旦柚獨立 ／ 葡萄 5 項 ／ 芒果 2 項</span>
+      <span class="badge">銜接目標：Step 2 Land Cover 圖資套疊 ／ Step 3 鄉鎮農民訪談</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPI 總覽 -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- 模組 1：全台長期消長 -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="step-tag">模組 1</span> 全台果樹長期消長總覽（2008–2025）</h2>
+        <div class="controls" id="catFilterBtns">
+          <button class="tab-btn active" data-cat="MAJOR">主力品項 (&ge;200ha)</button>
+          <button class="tab-btn" data-cat="ALL">全部品項 (33)</button>
+          <button class="tab-btn" data-cat="溫帶/需冷">溫帶/需冷</button>
+          <button class="tab-btn" data-cat="柑橘(甜橙/寬皮)">柑橘(甜橙/寬皮)</button>
+          <button class="tab-btn" data-cat="柑橘(酸柑/金柑)">柑橘(酸柑/金柑)</button>
+          <button class="tab-btn" data-cat="文旦柚">文旦柚(獨立)</button>
+          <button class="tab-btn" data-cat="其他柚類">其他柚類</button>
+          <button class="tab-btn" data-cat="葡萄類">葡萄類</button>
+          <button class="tab-btn" data-cat="芒果類">芒果類</button>
+          <button class="tab-btn" data-cat="耐熱/熱帶">其他耐熱/熱帶</button>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div style="font-size:0.84rem;color:var(--muted);margin-bottom:6px;">歷年全台總種植面積（公頃）— 可點擊下方圖例開關單一作物</div>
+          <div id="chartMacroLines" class="chart-box"></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:0.84rem;color:var(--muted);">近 5 年 (2021–2025) vs. 前 5 年 (2008–2012) 平均變化</span>
+            <select id="barMetricSelect">
+              <option value="ha">面積增減 (公頃)</option>
+              <option value="pct">變化率 (%)</option>
+            </select>
+          </div>
+          <div id="chartMacroBar" class="chart-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模組 2：四大重點族群深度拆解（柑橘、文旦柚、葡萄、芒果） -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="step-tag">模組 2</span> 重點品項族群深度拆解（柑橘細項 ／ 文旦柚獨立 ／ 葡萄細項 ／ 芒果細項）</h2>
+        <div class="controls" id="familySubControls"></div>
+      </div>
+
+      <div class="family-tabs" id="familyTabs">
+        <button class="family-tab active" data-fam="citrus">柑橘類細項（不含文旦及柚類，12項）</button>
+        <button class="family-tab" data-fam="wendan">文旦柚獨立專區（607，附其他柚類對照）</button>
+        <button class="family-tab" data-fam="grape">葡萄類細項（鮮食 vs 釀酒，5項）</button>
+        <button class="family-tab" data-fam="mango">芒果類專區（改良種 vs 本地種，2項）</button>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div id="familySummaryBar" class="town-summary-bar"></div>
+          <div id="chartFamilyMain" class="chart-box" style="height:365px;"></div>
+          <div id="familyNoteBox" class="info-box"></div>
+        </div>
+        <div>
+          <div style="font-size:0.84rem;font-weight:600;color:#334155;margin-bottom:6px;" id="familyCropTableTitle">品項明細與空間質心位移</div>
+          <div class="table-wrap-sm">
+            <table>
+              <thead>
+                <tr>
+                  <th>品項 (代碼)</th>
+                  <th>前5年均</th>
+                  <th>近5年均</th>
+                  <th>增減 (變化率)</th>
+                  <th>質心北移</th>
+                </tr>
+              </thead>
+              <tbody id="familyCropTbody"></tbody>
+            </table>
+          </div>
+
+          <div style="font-size:0.84rem;font-weight:600;color:#334155;margin-bottom:6px;" id="familyTownTableTitle">核心產區鄉鎮消長排行（點擊可連動下方模組 4 查看該鄉鎮全部果樹）</div>
+          <div class="table-wrap-sm" style="max-height:225px;margin-bottom:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>鄉鎮 (區域)</th>
+                  <th>前5年 → 近5年 (ha)</th>
+                  <th>淨變化</th>
+                  <th>主要品項結構</th>
+                </tr>
+              </thead>
+              <tbody id="familyTownTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模組 3：空間地圖與質心北移 -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="step-tag">模組 3</span> 單一作物鄉鎮空間分佈與「產區北移」量化軌跡</h2>
+        <div class="controls">
+          <label for="cropSelect" style="font-size:0.85rem;color:var(--muted);">選擇作物 (33項)：</label>
+          <select id="cropSelect"></select>
+          <select id="mapModeSelect">
+            <option value="diff">面積增減 (近5年 − 前5年)</option>
+            <option value="recent">近 5 年平均種植面積</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-map">
+        <div>
+          <div style="font-size:0.84rem;color:var(--muted);margin-bottom:4px;">點擊地圖上的任一鄉鎮，可於下方「模組 4」查看該鄉鎮 33 項果樹歷年結構</div>
+          <div id="chartMap" class="map-box"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div id="centroidStatBox" class="town-summary-bar"></div>
+          <div id="chartCentroid" class="sub-chart-box"></div>
+          <div id="chartRegionStack" class="sub-chart-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模組 4：A->B 轉作熱點鄉鎮 -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="step-tag">模組 4</span> 潛在 A→B 轉作熱點鄉鎮清單（對接 Step 2 Land Cover 套疊與 Step 3 訪談）</h2>
+        <div class="controls">
+          <select id="regionFilter">
+            <option value="ALL">全部區域</option>
+            <option value="北部">北部</option>
+            <option value="中部">中部</option>
+            <option value="南部">南部</option>
+            <option value="東部">東部</option>
+          </select>
+          <input type="text" id="townSearchInput" placeholder="搜尋全台 368 鄉鎮 (如 古坑、麻豆、二林、六龜)..." style="width:265px;" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:21%;">鄉鎮 (區域)</th>
+                  <th style="width:37%;">顯著減少作物 (A)</th>
+                  <th style="width:36%;">顯著增加作物 (B)</th>
+                  <th style="width:6%;">訊號</th>
+                </tr>
+              </thead>
+              <tbody id="hotspotTbody"></tbody>
+            </table>
+          </div>
+          <div class="note-box">
+            <strong>訊號排序邏輯：</strong>納入完整柑橘 12 細項、文旦柚、葡萄 5 項與芒果 2 項後，優先挑選「同時出現溫帶／傳統柑橘／釀酒葡萄／土芒果大幅減少，且耐熱果樹／新興柑橘／改良種芒果大幅增加」的鄉鎮。點擊任一列可在右側檢視完整 18 年消長。
+          </div>
+        </div>
+        <div>
+          <div id="townDetailHeader" class="town-summary-bar">請點擊左側表格或上方地圖任一鄉鎮</div>
+          <div id="chartTownDrill" class="chart-box" style="height:420px;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    資料口徑與版本說明（v2.0）：採用農業部農情調查（UnitId=038）「種植面積（公頃）」，共涵蓋 33 項果樹代碼；文旦柚（607）獨立統計不混入一般柑橘類；已對齊 2010／2014 縣市升格行政區、去除 API 重複列，並針對單年登錄異常值插補修正。詳細改版紀錄與方法論請參閱專案內 <code>DASHBOARD_CHANGELOG.md</code>。
+  </footer>
+
+  <script>
+    const D = window.DASHBOARD_DATA;
+    const TOPO = window.TAIWAN_TOPO;
+
+    document.getElementById("verBadge").textContent = `v${D.version || "2.0"} (${D.updated_at || ""})`;
+
+    let currentCategory = "MAJOR";
+    let currentBarMetric = "ha";
+    let currentFamily = "citrus";
+    let familyViewMode = "detail"; // "detail" | "group" | "minor"
+    let currentCrop = "文旦柚";
+    let currentMapMode = "diff";
+    let selectedTownKey = D.switch_hotspots.length ? D.switch_hotspots[0].key : Object.keys(D.towns)[0];
+
+    const cropMap = {};
+    D.crops.forEach(c => { cropMap[c.crop] = c; });
+
+    const chartMacroLines = echarts.init(document.getElementById("chartMacroLines"));
+    const chartMacroBar = echarts.init(document.getElementById("chartMacroBar"));
+    const chartFamilyMain = echarts.init(document.getElementById("chartFamilyMain"));
+    const chartMap = echarts.init(document.getElementById("chartMap"));
+    const chartCentroid = echarts.init(document.getElementById("chartCentroid"));
+    const chartRegionStack = echarts.init(document.getElementById("chartRegionStack"));
+    const chartTownDrill = echarts.init(document.getElementById("chartTownDrill"));
+
+    const geoJson = topojson.feature(TOPO, TOPO.objects.towns);
+    geoJson.features.forEach(f => {
+      const c = f.properties.COUNTYNAME.trim().replace(/台/g, "臺");
+      const t = f.properties.TOWNNAME.trim().replace(/台/g, "臺");
+      f.properties.name = `${c}|${t}`;
+      f.properties.label = `${c}${t}`;
+    });
+    echarts.registerMap("TW_TOWNS", geoJson);
+
+    function fmtSign(v, unit = "") {
+      return `${v > 0 ? "+" : ""}${v.toLocaleString()}${unit}`;
+    }
+
+    // 1. KPI 卡片
+    function renderKPIs() {
+      const fam = D.families;
+      const cEarly = fam.citrus.total_yearly_ha.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
+      const cRecent = fam.citrus.total_yearly_ha.slice(-5).reduce((a, b) => a + b, 0) / 5;
+      const cPct = ((cRecent - cEarly) / cEarly * 100).toFixed(1);
+
+      const wendan = cropMap["文旦柚"];
+      const gEarly = fam.grape.total_yearly_ha.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
+      const gRecent = fam.grape.total_yearly_ha.slice(-5).reduce((a, b) => a + b, 0) / 5;
+      const gPct = ((gRecent - gEarly) / gEarly * 100).toFixed(1);
+
+      const mImp = cropMap["改良種芒果"];
+      const mNat = cropMap["本地種芒果"];
+
+      const sortedHa = [...D.crops].sort((a, b) => b.diff_ha - a.diff_ha);
+      const topGain = sortedHa[0];
+      const topLoss = sortedHa[sortedHa.length - 1];
+
+      const cards = [
+        {
+          label: "柑橘類合計（不含文旦及柚類）",
+          value: `${cPct >= 0 ? "+" : ""}${cPct}%`,
+          sub: `${Math.round(cEarly).toLocaleString()} → ${Math.round(cRecent).toLocaleString()} ha（共 12 細項）`,
+          cls: cPct >= 0 ? "kpi-gain" : "kpi-loss"
+        },
+        {
+          label: "文旦柚（獨立追蹤 607）",
+          value: `${wendan.pct_change >= 0 ? "+" : ""}${wendan.pct_change}%`,
+          sub: `${wendan.early_avg_ha.toLocaleString()} → ${wendan.recent_avg_ha.toLocaleString()} ha｜質心 ${fmtSign(wendan.net_north_km, " km")}`,
+          cls: wendan.pct_change >= 0 ? "kpi-gain" : "kpi-loss"
+        },
+        {
+          label: "葡萄類合計（5 細項）",
+          value: `${gPct}%`,
+          sub: `${Math.round(gEarly).toLocaleString()} → ${Math.round(gRecent).toLocaleString()} ha（鮮食 + 釀酒）`,
+          cls: gPct >= 0 ? "kpi-gain" : "kpi-loss"
+        },
+        {
+          label: "芒果類（改良種 vs 本地種）",
+          value: `改良 ${fmtSign(mImp.pct_change, "%")} / 土芒 ${fmtSign(mNat.pct_change, "%")}`,
+          sub: `改良 ${mImp.recent_avg_ha.toLocaleString()} ha｜本地種 ${mNat.recent_avg_ha.toLocaleString()} ha`,
+          cls: "kpi-gain"
+        },
+        {
+          label: "面積增減極端品項",
+          value: `+${Math.round(topGain.diff_ha)} / ${Math.round(topLoss.diff_ha)} ha`,
+          sub: `最擴張：${topGain.crop}｜最縮減：${topLoss.crop}`,
+          cls: ""
+        }
+      ];
+      document.getElementById("kpiGrid").innerHTML = cards.map(c => `
+        <div class="kpi-card">
+          <div class="kpi-label">${c.label}</div>
+          <div class="kpi-value ${c.cls || ""}">${c.value}</div>
+          <div class="kpi-sub">${c.sub}</div>
+        </div>
+      `).join("");
+    }
+
+    // 2. 模組 1：全台消長
+    function getFilteredMacroCrops() {
+      if (currentCategory === "ALL") return D.crops;
+      if (currentCategory === "MAJOR") {
+        return D.crops.filter(c => Math.max(c.early_avg_ha, c.recent_avg_ha) >= 200);
+      }
+      if (currentCategory === "耐熱/熱帶") {
+        return D.crops.filter(c => c.category === "耐熱/熱帶" || c.category === "傳統大宗");
+      }
+      return D.crops.filter(c => c.category === currentCategory);
+    }
+
+    function renderMacro() {
+      const list = getFilteredMacroCrops();
+
+      chartMacroLines.setOption({
+        tooltip: { trigger: "axis" },
+        legend: { type: "scroll", bottom: 0, textStyle: { fontSize: 11 } },
+        grid: { top: 20, left: 62, right: 20, bottom: 52 },
+        xAxis: { type: "category", data: D.years },
+        yAxis: { type: "value", name: "公頃", axisLabel: { formatter: v => v.toLocaleString() } },
+        series: list.map(c => ({
+          name: c.crop,
+          type: "line",
+          smooth: 0.2,
+          symbolSize: 4,
+          data: c.yearly.map(y => y.planted_ha)
+        }))
+      }, true);
+
+      const sorted = [...list].sort((a, b) =>
+        currentBarMetric === "pct" ? a.pct_change - b.pct_change : a.diff_ha - b.diff_ha
+      );
+      chartMacroBar.setOption({
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+          formatter: params => {
+            const p = params[0];
+            const c = sorted[p.dataIndex];
+            return `<b>${c.crop}</b> [代碼 ${c.code}｜${c.category}]<br/>前5年均：${c.early_avg_ha.toLocaleString()} ha<br/>近5年均：${c.recent_avg_ha.toLocaleString()} ha<br/>增減：<b>${fmtSign(c.diff_ha, " ha")}</b> (${fmtSign(c.pct_change, "%")})<br/>質心北移：${fmtSign(c.net_north_km, " km")}`;
+          }
+        },
+        grid: { top: 14, left: 90, right: 48, bottom: 28 },
+        xAxis: { type: "value", axisLabel: { formatter: v => currentBarMetric === "pct" ? `${v}%` : v.toLocaleString() } },
+        yAxis: { type: "category", data: sorted.map(c => c.crop), axisLabel: { fontSize: list.length > 20 ? 10 : 11 } },
+        series: [{
+          type: "bar",
+          data: sorted.map(c => {
+            const val = currentBarMetric === "pct" ? c.pct_change : c.diff_ha;
+            return {
+              value: val,
+              itemStyle: { color: val >= 0 ? "#dc2626" : "#2563eb", borderRadius: val >= 0 ? [0,4,4,0] : [4,0,0,4] }
+            };
+          }),
+          label: {
+            show: list.length <= 22,
+            position: "right",
+            fontSize: 10.5,
+            formatter: p => currentBarMetric === "pct" ? `${p.value > 0 ? "+" : ""}${p.value}%` : `${p.value > 0 ? "+" : ""}${Math.round(p.value)}`
+          }
+        }]
+      }, true);
+    }
+
+    // 3. 模組 2：四大重點族群深度拆解
+    function renderFamilyControls() {
+      const box = document.getElementById("familySubControls");
+      if (currentFamily === "citrus") {
+        box.innerHTML = `
+          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">12 項柑橘個別曲線</button>
+          <button class="tab-btn ${familyViewMode === 'group' ? 'active' : ''}" data-mode="group">甜橙/寬皮 vs 酸柑/金柑 堆疊</button>
+        `;
+      } else if (currentFamily === "wendan") {
+        box.innerHTML = `
+          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">文旦柚 北/中/南/東 產區消長</button>
+          <button class="tab-btn ${familyViewMode === 'group' ? 'active' : ''}" data-mode="group">文旦柚 vs 其他柚類(白柚/葡萄柚/斗柚)</button>
+        `;
+      } else if (currentFamily === "grape") {
+        box.innerHTML = `
+          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">全部 5 種葡萄總覽</button>
+          <button class="tab-btn ${familyViewMode === 'minor' ? 'active' : ''}" data-mode="minor">放大檢視：釀酒葡萄(金香/黑后)與小宗品種</button>
+        `;
+      } else {
+        box.innerHTML = `
+          <button class="tab-btn ${familyViewMode === 'detail' ? 'active' : ''}" data-mode="detail">改良種 vs 本地種 面積折線</button>
+          <button class="tab-btn ${familyViewMode === 'group' ? 'active' : ''}" data-mode="group">芒果總面積堆疊演變</button>
+        `;
+      }
+      box.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          familyViewMode = btn.dataset.mode;
+          renderFamilyModule();
+        });
+      });
+    }
+
+    function renderFamilyModule() {
+      renderFamilyControls();
+      const fam = D.families[currentFamily];
+      const eTotal = fam.total_yearly_ha.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
+      const rTotal = fam.total_yearly_ha.slice(-5).reduce((a, b) => a + b, 0) / 5;
+      const diffTotal = rTotal - eTotal;
+      const pctTotal = eTotal > 0 ? (diffTotal / eTotal * 100) : 0;
+
+      document.getElementById("familySummaryBar").innerHTML = `
+        <strong>${fam.title}</strong><br/>
+        前 5 年平均（2008–2012）：<b>${Math.round(eTotal).toLocaleString()} ha</b> →
+        近 5 年平均（2021–2025）：<b>${Math.round(rTotal).toLocaleString()} ha</b>
+        （淨變化：<b style="color:${diffTotal >= 0 ? '#dc2626' : '#2563eb'}">${fmtSign(Math.round(diffTotal), " ha")} ／ ${fmtSign( Number(pctTotal.toFixed(1)), "%" )}</b>）
+      `;
+
+      let tableCrops = fam.crops.map(n => cropMap[n]).filter(Boolean);
+      const noteEl = document.getElementById("familyNoteBox");
+
+      if (currentFamily === "citrus") {
+        noteEl.innerHTML = `<strong>柑橘類結構洞察（已排除文旦柚與其他柚類）：</strong>傳統大宗甜橙與寬皮柑（<b>柳橙、椪柑、桶柑、海梨柑、晚崙西亞橙</b>）面積顯著縮減，但在雲林、臺中等地部分轉往高單價晚熟柑橘（<b>茂谷柑</b>與<b>其他柑桔</b>如帝王柑、砂糖橘、佛利蒙柑）；同時南部屏東為主的酸柑桔類（<b>檸檬、萊姆、四季桔</b>）則呈現明顯擴張。`;
+        if (familyViewMode === "group") {
+          chartFamilyMain.setOption({
+            tooltip: { trigger: "axis" },
+            legend: { bottom: 0 },
+            grid: { top: 24, left: 60, right: 20, bottom: 48 },
+            xAxis: { type: "category", data: D.years },
+            yAxis: { type: "value", name: "公頃" },
+            series: fam.subgroups.map((sg, i) => ({
+              name: sg.name,
+              type: "line",
+              stack: "citrus",
+              areaStyle: { opacity: 0.45 },
+              itemStyle: { color: i === 0 ? "#ea580c" : "#16a34a" },
+              data: sg.yearly_ha
+            }))
+          }, true);
+        } else {
+          chartFamilyMain.setOption({
+            tooltip: { trigger: "axis" },
+            legend: { type: "scroll", bottom: 0, textStyle: { fontSize: 11 } },
+            grid: { top: 24, left: 60, right: 20, bottom: 48 },
+            xAxis: { type: "category", data: D.years },
+            yAxis: { type: "value", name: "公頃" },
+            series: tableCrops.map(c => ({
+              name: c.crop,
+              type: "line",
+              smooth: 0.2,
+              data: c.yearly.map(y => y.planted_ha)
+            }))
+          }, true);
+        }
+      } else if (currentFamily === "wendan") {
+        const wObj = cropMap["文旦柚"];
+        const otherPomelos = (fam.other_pomelos || []).map(n => cropMap[n]).filter(Boolean);
+        tableCrops = [wObj, ...otherPomelos];
+        noteEl.innerHTML = `<strong>文旦柚獨立處理說明：</strong>文旦柚（代碼 <code>607</code>）因節令產銷特性（白露與中秋節氣）、老欉樹齡結構與區域品牌（麻豆、瑞穗、鶴岡、斗六、西湖、八里、冬山）與一般柑橘截然不同，故獨立拆出追蹤，不併入柑橘總計。右側上半表另附白柚（609）、葡萄柚（612）、斗柚（608）供柚類內部比較；下半表則純粹統計<b>文旦柚（607）</b>全台 Top 15 鄉鎮消長。`;
+
+        if (familyViewMode === "detail") {
+          const regs = ["南部", "東部", "中部", "北部"];
+          const regColors = { "南部": "#ea580c", "東部": "#9333ea", "中部": "#16a34a", "北部": "#0284c7" };
+          chartFamilyMain.setOption({
+            tooltip: { trigger: "axis" },
+            legend: { bottom: 0 },
+            grid: { top: 24, left: 60, right: 20, bottom: 48 },
+            xAxis: { type: "category", data: D.years },
+            yAxis: { type: "value", name: "文旦柚面積 (公頃)" },
+            series: regs.map(r => ({
+              name: `${r}產區`,
+              type: "line",
+              stack: "wendan_reg",
+              areaStyle: { opacity: 0.5 },
+              itemStyle: { color: regColors[r] },
+              data: wObj.yearly.map(y => y.regions[r] || 0)
+            }))
+          }, true);
+        } else {
+          chartFamilyMain.setOption({
+            tooltip: { trigger: "axis" },
+            legend: { bottom: 0 },
+            grid: { top: 24, left: 60, right: 20, bottom: 48 },
+            xAxis: { type: "category", data: D.years },
+            yAxis: { type: "value", name: "公頃" },
+            series: tableCrops.map(c => ({
+              name: c.crop === "文旦柚" ? "文旦柚 (獨立主軸)" : `${c.crop} (其他柚類對照)`,
+              type: "line",
+              smooth: 0.2,
+              lineStyle: { width: c.crop === "文旦柚" ? 3.2 : 1.8, type: c.crop === "文旦柚" ? "solid" : "dashed" },
+              data: c.yearly.map(y => y.planted_ha)
+            }))
+          }, true);
+        }
+      } else if (currentFamily === "grape") {
+        noteEl.innerHTML = `<strong>葡萄類全品項洞察：</strong>農情調查共區分 5 個代碼——鮮食用<b>巨峰葡萄（629）</b>、早期鮮食<b>義大利葡萄（630）</b>、釀白酒用<b>金香葡萄（631）</b>、釀紅酒用<b>黑后葡萄（632）</b>及新品種<b>其他葡萄（633，如蜜紅、麝香等）</b>。切換至「放大檢視」可清楚看見彰化二林、臺中外埔等地釀酒葡萄退場的完整時間軌跡。`;
+        const plotCrops = familyViewMode === "minor"
+          ? tableCrops.filter(c => c.crop !== "巨峰葡萄")
+          : tableCrops;
+        chartFamilyMain.setOption({
+          tooltip: { trigger: "axis" },
+          legend: { bottom: 0 },
+          grid: { top: 24, left: 60, right: 20, bottom: 48 },
+          xAxis: { type: "category", data: D.years },
+          yAxis: { type: "value", name: "公頃" },
+          series: plotCrops.map(c => ({
+            name: c.crop,
+            type: "line",
+            smooth: 0.2,
+            lineStyle: { width: 2.5 },
+            data: c.yearly.map(y => y.planted_ha)
+          }))
+        }, true);
+      } else {
+        noteEl.innerHTML = `<strong>芒果類統計口徑與產區說明：</strong>農業部鄉鎮農情調查（UnitId=038）將芒果區分為<b>本地種芒果（620，即土芒果／柴檨）</b>與<b>改良種芒果（621）</b>兩大代碼；其中愛文、金煌、凱特、玉文、夏雪等品種於官方統計均合併登錄於「改良種芒果」。空間判讀上：<b>臺南（玉井、楠西、南化）與屏東（枋山、枋寮）以愛文為主力</b>，<b>高雄（六龜、桃源、杉林）以金煌為主力</b>；另屏東部分鄉鎮呈現明顯「土芒果減、改良種增」的品種汰換現象。`;
+        chartFamilyMain.setOption({
+          tooltip: { trigger: "axis" },
+          legend: { bottom: 0 },
+          grid: { top: 24, left: 60, right: 20, bottom: 48 },
+          xAxis: { type: "category", data: D.years },
+          yAxis: { type: "value", name: "公頃" },
+          series: tableCrops.map((c, idx) => ({
+            name: c.crop,
+            type: "line",
+            stack: familyViewMode === "group" ? "mango_total" : undefined,
+            areaStyle: familyViewMode === "group" ? { opacity: 0.45 } : undefined,
+            smooth: 0.2,
+            lineStyle: { width: 2.8 },
+            itemStyle: { color: idx === 0 ? "#dc2626" : "#d97706" },
+            data: c.yearly.map(y => y.planted_ha)
+          }))
+        }, true);
+      }
+
+      // 渲染右側上半：品項明細表（點擊可切換模組 3 地圖作物！）
+      const cropTbody = document.getElementById("familyCropTbody");
+      cropTbody.innerHTML = tableCrops.map(c => `
+        <tr class="clickable" data-crop="${c.crop}" title="點擊在下方模組 3 地圖查看 ${c.crop}">
+          <td><b>${c.crop}</b> <span style="color:#64748b;font-size:11px;">(${c.code})</span></td>
+          <td>${c.early_avg_ha.toLocaleString()} ha</td>
+          <td>${c.recent_avg_ha.toLocaleString()} ha</td>
+          <td style="color:${c.diff_ha >= 0 ? '#dc2626' : '#2563eb'};font-weight:600;">${fmtSign(c.diff_ha, " ha")} (${fmtSign(c.pct_change, "%")})</td>
+          <td>${fmtSign(c.net_north_km, " km")}</td>
+        </tr>
+      `).join("");
+      cropTbody.querySelectorAll("tr.clickable").forEach(tr => {
+        tr.addEventListener("click", () => {
+          currentCrop = tr.dataset.crop;
+          document.getElementById("cropSelect").value = currentCrop;
+          renderSpatial();
+          document.getElementById("chartMap").scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      });
+
+      // 渲染右側下半：核心產區鄉鎮排行（點擊連動模組 4）
+      const townTbody = document.getElementById("familyTownTbody");
+      townTbody.innerHTML = fam.top_towns.map(t => `
+        <tr class="clickable ${t.key === selectedTownKey ? 'selected' : ''}" data-key="${t.key}">
+          <td><b>${t.city}${t.town}</b> <span style="color:#64748b;font-size:11px;">(${t.region})</span></td>
+          <td>${t.early_ha.toLocaleString()} → <b>${t.recent_ha.toLocaleString()}</b></td>
+          <td style="color:${t.diff_ha >= 0 ? '#dc2626' : '#2563eb'};font-weight:600;">${fmtSign(t.diff_ha, " ha")}</td>
+          <td>${t.breakdown.slice(0, 3).map(b => `<span class="pill ${b.diff_ha >= 0 ? 'pill-gain' : 'pill-loss'}">${b.crop} ${b.recent_ha}ha (${fmtSign(b.diff_ha)})</span>`).join("")}</td>
+        </tr>
+      `).join("");
+      townTbody.querySelectorAll("tr.clickable").forEach(tr => {
+        tr.addEventListener("click", () => {
+          selectedTownKey = tr.dataset.key;
+          renderFamilyModule();
+          renderHotspotTable();
+          renderTownDetail();
+          document.getElementById("townDetailHeader").scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      });
+    }
+
+    // 4. 模組 3：地圖與質心北移
+    function renderSpatial() {
+      const cropObj = cropMap[currentCrop] || D.crops[0];
+      if (!cropObj) return;
+
+      const mapData = [];
+      let minVal = 0, maxVal = 100;
+      Object.entries(D.towns).forEach(([key, t]) => {
+        const ch = t.changes[cropObj.crop];
+        if (!ch) return;
+        const val = currentMapMode === "diff" ? ch.diff_ha : ch.recent_ha;
+        if (currentMapMode === "recent" && val <= 0) return;
+        mapData.push({
+          name: key,
+          value: val,
+          early: ch.early_ha,
+          recent: ch.recent_ha,
+          diff: ch.diff_ha
+        });
+      });
+
+      if (currentMapMode === "diff") {
+        const maxAbs = Math.max(15, ...mapData.map(d => Math.abs(d.value)));
+        const cap = Math.min(maxAbs, 200);
+        minVal = -cap;
+        maxVal = cap;
+      } else {
+        maxVal = Math.max(30, ...mapData.map(d => d.value));
+        minVal = 0;
+      }
+
+      chartMap.setOption({
+        tooltip: {
+          trigger: "item",
+          formatter: p => {
+            const label = p.name.replace("|", "");
+            if (!p.data) return `${label}<br/>無 ${cropObj.crop} 種植紀錄`;
+            return `<b>${label}</b>（${cropObj.crop}）<br/>前5年均：${p.data.early} ha<br/>近5年均：${p.data.recent} ha<br/>增減：<b>${fmtSign(p.data.diff, " ha")}</b><br/><span style="color:#64748b;font-size:11px;">點擊可查看該鄉鎮所有果樹變化</span>`;
+          }
+        },
+        visualMap: currentMapMode === "diff" ? {
+          min: minVal, max: maxVal, left: 10, bottom: 16,
+          text: ["增加 (ha)", "減少 (ha)"],
+          inRange: { color: ["#1d4ed8", "#93c5fd", "#f8fafc", "#fca5a5", "#b91c1c"] },
+          calculable: true
+        } : {
+          min: 0, max: maxVal, left: 10, bottom: 16,
+          text: ["面積多", "面積少"],
+          inRange: { color: ["#f0fdf4", "#86efac", "#15803d", "#14532d"] },
+          calculable: true
+        },
+        series: [{
+          name: cropObj.crop,
+          type: "map",
+          map: "TW_TOWNS",
+          roam: true,
+          zoom: 1.15,
+          center: [120.95, 23.75],
+          itemStyle: { areaColor: "#f1f5f9", borderColor: "#cbd5e1", borderWidth: 0.4 },
+          emphasis: { label: { show: false }, itemStyle: { areaColor: "#fde047" } },
+          data: mapData
+        }]
+      }, true);
+
+      const dirText = cropObj.net_north_km >= 0 ? `向北移動 +${cropObj.net_north_km} km` : `向南移動 ${cropObj.net_north_km} km`;
+      document.getElementById("centroidStatBox").innerHTML = `
+        <strong>${cropObj.crop}</strong>（代碼 ${cropObj.code}｜${cropObj.category}）｜
+        全台面積：<b>${cropObj.early_avg_ha.toLocaleString()} → ${cropObj.recent_avg_ha.toLocaleString()} ha</b>（${fmtSign(cropObj.pct_change, "%")}）<br/>
+        面積加權質心變化（前5年 vs 近5年）：<b style="color:${cropObj.net_north_km >= 0 ? "#dc2626" : "#2563eb"}">${dirText}</b>
+        ｜線性趨勢斜率：<b>${fmtSign(cropObj.north_km_per_decade, " km/10年")}</b>（R² = ${cropObj.lat_r2}）
+      `;
+
+      chartCentroid.setOption({
+        title: { text: `${cropObj.crop}：面積加權質心緯度變化 (°N)`, left: 8, textStyle: { fontSize: 13 } },
+        tooltip: { trigger: "axis", valueFormatter: v => v ? `${v}°N` : "無資料" },
+        grid: { top: 36, left: 56, right: 20, bottom: 26 },
+        xAxis: { type: "category", data: D.years },
+        yAxis: { type: "value", scale: true, axisLabel: { formatter: v => `${v.toFixed(2)}°` } },
+        series: [{
+          name: "重心緯度",
+          type: "line",
+          smooth: 0.2,
+          itemStyle: { color: "#0f766e" },
+          lineStyle: { width: 2.5 },
+          data: cropObj.yearly.map(y => y.centroid_lat)
+        }]
+      }, true);
+
+      const regs = ["北部", "中部", "南部", "東部"];
+      const regColors = { "北部": "#0284c7", "中部": "#16a34a", "南部": "#ea580c", "東部": "#9333ea" };
+      chartRegionStack.setOption({
+        title: { text: `${cropObj.crop}：北 / 中 / 南 / 東 區域種植面積 (公頃)`, left: 8, textStyle: { fontSize: 13 } },
+        tooltip: { trigger: "axis" },
+        legend: { right: 8, top: 2, textStyle: { fontSize: 11 } },
+        grid: { top: 36, left: 56, right: 20, bottom: 26 },
+        xAxis: { type: "category", data: D.years },
+        yAxis: { type: "value" },
+        series: regs.map(r => ({
+          name: r,
+          type: "line",
+          stack: "total",
+          areaStyle: { opacity: 0.45 },
+          itemStyle: { color: regColors[r] },
+          data: cropObj.yearly.map(y => y.regions[r] || 0)
+        }))
+      }, true);
+    }
+
+    // 5. 模組 4：熱點清單與單一鄉鎮鑽取
+    function renderHotspotTable() {
+      const regFilter = document.getElementById("regionFilter").value;
+      const kw = document.getElementById("townSearchInput").value.trim();
+
+      let rows = D.switch_hotspots;
+      if (kw) {
+        rows = Object.entries(D.towns)
+          .filter(([k, t]) => (t.city + t.town).includes(kw) && (regFilter === "ALL" || t.region === regFilter))
+          .map(([k, t]) => {
+            const entries = Object.entries(t.changes);
+            const losses = entries.filter(([, v]) => v.diff_ha <= -3).sort((a,b) => a[1].diff_ha - b[1].diff_ha).slice(0,4).map(([c,v]) => [c, v.diff_ha]);
+            const gains = entries.filter(([, v]) => v.diff_ha >= 3).sort((a,b) => b[1].diff_ha - a[1].diff_ha).slice(0,4).map(([c,v]) => [c, v.diff_ha]);
+            const found = D.switch_hotspots.find(h => h.key === k);
+            return { key: k, city: t.city, town: t.town, region: t.region, top_losses: losses, top_gains: gains, switch_score: found ? found.switch_score : "-" };
+          })
+          .slice(0, 50);
+      } else if (regFilter !== "ALL") {
+        rows = rows.filter(r => r.region === regFilter);
+      }
+
+      const tbody = document.getElementById("hotspotTbody");
+      tbody.innerHTML = rows.map(r => `
+        <tr class="clickable ${r.key === selectedTownKey ? "selected" : ""}" data-key="${r.key}">
+          <td><b>${r.city}${r.town}</b><br/><span style="color:var(--muted);font-size:11px;">${r.region}</span></td>
+          <td>${r.top_losses.map(([c, d]) => `<span class="pill pill-loss">${c} ${d} ha</span>`).join("") || '<span style="color:#94a3b8;">無顯著減少</span>'}</td>
+          <td>${r.top_gains.map(([c, d]) => `<span class="pill pill-gain">${c} +${d} ha</span>`).join("") || '<span style="color:#94a3b8;">無顯著增加</span>'}</td>
+          <td style="font-weight:600;color:var(--primary);">${r.switch_score}</td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll("tr.clickable").forEach(tr => {
+        tr.addEventListener("click", () => {
+          selectedTownKey = tr.dataset.key;
+          renderHotspotTable();
+          renderTownDetail();
+        });
+      });
+    }
+
+    function renderTownDetail() {
+      const t = D.towns[selectedTownKey];
+      if (!t) return;
+      document.getElementById("townDetailHeader").innerHTML = `
+        <strong style="font-size:1.05rem;">${t.city} ${t.town}</strong>（${t.region}）｜
+        33 項果樹總面積：<b>${t.total_early_ha.toLocaleString()} ha</b>（2008–2012均） → <b>${t.total_recent_ha.toLocaleString()} ha</b>（2021–2025均）
+      `;
+
+      const cropNames = Object.keys(t.series).sort((a, b) => {
+        const maxA = Math.max(...t.series[a]);
+        const maxB = Math.max(...t.series[b]);
+        return maxB - maxA;
+      });
+
+      // 預設顯示前 10 大作物圖例開啟，其餘可手動點開避免視覺擁擠
+      const legendSelected = {};
+      cropNames.forEach((name, idx) => { legendSelected[name] = idx < 10; });
+
+      chartTownDrill.setOption({
+        tooltip: { trigger: "axis" },
+        legend: { type: "scroll", bottom: 0, selected: legendSelected, textStyle: { fontSize: 11 } },
+        grid: { top: 24, left: 58, right: 20, bottom: 52 },
+        xAxis: { type: "category", data: D.years },
+        yAxis: { type: "value", name: "種植面積 (公頃)" },
+        series: cropNames.map(c => ({
+          name: c,
+          type: "line",
+          smooth: 0.2,
+          lineStyle: { width: 2.2 },
+          data: t.series[c]
+        }))
+      }, true);
+    }
+
+    // 初始化作物分組下拉選單
+    const cropSel = document.getElementById("cropSelect");
+    const catOrder = [
+      "文旦柚",
+      "柑橘(甜橙/寬皮)",
+      "柑橘(酸柑/金柑)",
+      "其他柚類",
+      "葡萄類",
+      "芒果類",
+      "溫帶/需冷",
+      "耐熱/熱帶",
+      "傳統大宗"
+    ];
+    catOrder.forEach(cat => {
+      const items = D.crops.filter(c => c.category === cat);
+      if (!items.length) return;
+      const grp = document.createElement("optgroup");
+      grp.label = `── ${cat} (${items.length}) ──`;
+      items.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.crop;
+        opt.textContent = `${c.crop} [代碼 ${c.code}] (${c.recent_avg_ha} ha)`;
+        if (c.crop === currentCrop) opt.selected = true;
+        grp.appendChild(opt);
+      });
+      cropSel.appendChild(grp);
+    });
+
+    cropSel.addEventListener("change", e => { currentCrop = e.target.value; renderSpatial(); });
+    document.getElementById("mapModeSelect").addEventListener("change", e => { currentMapMode = e.target.value; renderSpatial(); });
+    document.getElementById("barMetricSelect").addEventListener("change", e => { currentBarMetric = e.target.value; renderMacro(); });
+    document.getElementById("regionFilter").addEventListener("change", renderHotspotTable);
+    document.getElementById("townSearchInput").addEventListener("input", renderHotspotTable);
+
+    document.querySelectorAll("#catFilterBtns button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#catFilterBtns button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentCategory = btn.dataset.cat;
+        renderMacro();
+      });
+    });
+
+    document.querySelectorAll("#familyTabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#familyTabs button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFamily = btn.dataset.fam;
+        familyViewMode = "detail";
+        renderFamilyModule();
+      });
+    });
+
+    chartMap.on("click", params => {
+      if (params.name && D.towns[params.name]) {
+        selectedTownKey = params.name;
+        renderHotspotTable();
+        renderTownDetail();
+        document.getElementById("townDetailHeader").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      [chartMacroLines, chartMacroBar, chartFamilyMain, chartMap, chartCentroid, chartRegionStack, chartTownDrill].forEach(c => c.resize());
+    });
+
+    renderKPIs();
+    renderMacro();
+    renderFamilyModule();
+    renderSpatial();
+    renderHotspotTable();
+    renderTownDetail();
+  </script>
+</body>
+</html>
